@@ -1,0 +1,3 @@
+rootProject.name = 'muco'
+include('eureka-server')
+include('auth-service')
