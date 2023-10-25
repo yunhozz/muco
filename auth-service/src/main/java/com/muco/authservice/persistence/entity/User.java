@@ -1,8 +1,7 @@
 package com.muco.authservice.persistence.entity;
 
+import com.muco.authservice.global.enums.LoginType;
 import com.muco.authservice.global.enums.Role;
-import com.muco.authservice.global.enums.SocialType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,22 +26,14 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, length = 50, nullable = false)
-    private String email;
-
-    private String password;
-
-    @Column(length = 10)
-    private String name;
-
-    private int age;
-
-    @Column(length = 8, nullable = false)
-    private String nickname;
-
     @Enumerated(EnumType.STRING)
-    private SocialType socialType; // GOOGLE, KAKAO, NAVER
+    private LoginType loginType; // GOOGLE, KAKAO, NAVER, LOCAL
 
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>(); // ADMIN, USER, GUEST
+
+    public User(LoginType loginType) {
+        this.loginType = loginType;
+        this.roles.add(Role.GUEST); // 처음 회원 등록 시 무조건 GUEST 권한 획득
+    }
 }
