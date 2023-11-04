@@ -1,5 +1,6 @@
 package com.muco.authservice.persistence.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,16 +25,11 @@ public class UserPassword extends BaseEntity {
 
     private String password;
 
-    private String hash;
+    @Column(columnDefinition = "TINYINT(1)")
+    private int retryCount;
 
     public UserPassword(User user, String password) {
         this.user = user;
         this.password = password;
-    }
-
-    public UserPassword(User user, String password, String hash) {
-        this.user = user;
-        this.password = password;
-        this.hash = hash;
     }
 }
