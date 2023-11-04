@@ -7,9 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 @RequiredArgsConstructor
 public enum Role implements GrantedAuthority {
 
-    ADMIN("admin","운영자"),
-    USER("user", "일반 사용자"),
-    GUEST("guest", "게스트")
+    ADMIN("ROLE_ADMIN","운영자"),
+    USER("ROLE_USER", "일반 사용자"),
+    GUEST("ROLE_GUEST", "게스트")
 
     ;
 
