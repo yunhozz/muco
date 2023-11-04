@@ -36,9 +36,10 @@ public class UserProfile extends BaseEntity {
 
     private String imageUrl;
 
-    public static UserProfile createUserProfile(User user, String name, int age, String nickname, String imageUrl) {
+    public static UserProfile createUserProfile(User user, String email, String name, int age, String nickname, String imageUrl) {
         UserProfile userProfile = new UserProfile();
         userProfile.user = user;
+        userProfile.email = email;
         userProfile.name = name;
         userProfile.age = age;
         userProfile.nickname = nickname;

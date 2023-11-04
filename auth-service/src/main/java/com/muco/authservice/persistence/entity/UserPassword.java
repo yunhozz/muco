@@ -26,6 +26,11 @@ public class UserPassword extends BaseEntity {
 
     private String hash;
 
+    public UserPassword(User user, String password) {
+        this.user = user;
+        this.password = password;
+    }
+
     public UserPassword(User user, String password, String hash) {
         this.user = user;
         this.password = password;
