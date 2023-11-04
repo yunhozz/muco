@@ -32,4 +32,8 @@ public class UserPassword extends BaseEntity {
         this.user = user;
         this.password = password;
     }
+
+    public boolean isRetryCountMoreThan(int count) {
+        return retryCount > count;
+    }
 }

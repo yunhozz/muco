@@ -45,7 +45,7 @@ public class AuthService {
         validatePassword(password, userPassword); // 비밀번호 검증
 
         // 로그인 성공 시 오류 횟수 초기화
-        if (userPassword.getRetryCount() > 0) {
+        if (userPassword.isRetryCountMoreThan(0)) {
             userPasswordRepository.resetRetryCountById(userPassword.getId());
         }
 
@@ -94,7 +94,7 @@ public class AuthService {
     private void validatePassword(String password, UserPassword userPassword) {
         if (!encoder.matches(password, userPassword.getPassword())) {
             userPasswordRepository.addRetryCountById(userPassword.getId()); // 오류 카운트 + 1
-            if (userPassword.getRetryCount() > 5) {
+            if (userPassword.isRetryCountMoreThan(5)) {
                 //TODO: 5회 이상 비밀번호 오류 시 해당 계정 로그인 제한
                 throw new RuntimeException("3회 이상 비밀번호를 잘못 입력하셨습니다.");
             }
