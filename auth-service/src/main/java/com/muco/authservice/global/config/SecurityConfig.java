@@ -50,11 +50,11 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**"))
-                .requestMatchers(new AntPathRequestMatcher( "/favicon.ico"))
-                .requestMatchers(new AntPathRequestMatcher( "/css/**"))
-                .requestMatchers(new AntPathRequestMatcher( "/js/**"))
-                .requestMatchers(new AntPathRequestMatcher( "/img/**"))
-                .requestMatchers(new AntPathRequestMatcher( "/lib/**"));
+                .requestMatchers(new AntPathRequestMatcher("/favicon.ico"))
+                .requestMatchers(new AntPathRequestMatcher("/css/**"))
+                .requestMatchers(new AntPathRequestMatcher("/js/**"))
+                .requestMatchers(new AntPathRequestMatcher("/img/**"))
+                .requestMatchers(new AntPathRequestMatcher("/lib/**"));
     }
 
     @Bean
