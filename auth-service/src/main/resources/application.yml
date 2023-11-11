@@ -9,6 +9,6 @@ server:
 spring:
   profiles:
     active: local
-    include: jwt, redis
+    include: jwt, redis, mail
   application:
     name: auth-server
