@@ -49,17 +49,15 @@ public class AuthService {
             userPasswordRepository.resetRetryCountById(userPassword.getId());
         }
 
-        return generateJwtToken(String.valueOf(user.getId()), email, user.getRoles());
+        return generateJwtToken(String.valueOf(user.getId()), user.getRoles());
     }
 
     @Transactional(readOnly = true)
-    public Optional<TokenResponseDTO> refreshJwtTokens(Long userId) {
-        String email = getEmailByUserId(userId);
-        if (redisUtils.getValue(email).isPresent()) {
-            String refreshToken = redisUtils.getValue(email).get();
+    public Optional<TokenResponseDTO> refreshJwtTokens(String userId) {
+        if (redisUtils.getValue(userId).isPresent()) {
+            String refreshToken = redisUtils.getValue(userId).get();
             UserDetailsImpl userDetails = getUserDetails(refreshToken);
-
-            return Optional.of(generateJwtToken(userDetails.getUsername(), email, userDetails.getRoles()));
+            return Optional.of(generateJwtToken(userDetails.getUsername(), userDetails.getRoles()));
 
         } else {
             return Optional.empty();
@@ -67,28 +65,22 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public void logout(Long userId, String token) {
-        String email = getEmailByUserId(userId);
-        redisUtils.getValue(email).ifPresent(refreshToken -> {
-            redisUtils.deleteValue(email);
+    public void logout(String userId, String token) {
+        redisUtils.getValue(userId).ifPresent(refreshToken -> {
+            redisUtils.deleteValue(userId);
             redisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
         });
     }
 
-    private TokenResponseDTO generateJwtToken(String userId, String email, Set<Role> roles) {
+    private TokenResponseDTO generateJwtToken(String userId, Set<Role> roles) {
         TokenResponseDTO tokenResponseDTO = jwtProvider.createJwtTokenDTO(userId, roles);
-        redisUtils.saveValue(email, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
+        redisUtils.saveValue(userId, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
         return tokenResponseDTO;
     }
 
     private UserDetailsImpl getUserDetails(String token) {
         Authentication authentication = jwtProvider.getAuthentication(token);
         return (UserDetailsImpl) authentication.getPrincipal();
-    }
-
-    private String getEmailByUserId(Long userId) {
-        return userProfileRepository.findEmailByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("해당 id의 유저의 이메일을 찾을 수 없습니다. ID = " + userId));
     }
 
     private void validatePassword(String password, UserPassword userPassword) {

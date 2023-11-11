@@ -47,8 +47,8 @@ public class AuthController {
 
     @GetMapping("/token")
     public ResponseEntity<Object> refreshToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        if (authService.refreshJwtTokens(Long.parseLong(userDetails.getUsername())).isPresent()) {
-            TokenResponseDTO tokenResponseDTO = authService.refreshJwtTokens(Long.parseLong(userDetails.getUsername())).get();
+        if (authService.refreshJwtTokens(userDetails.getUsername()).isPresent()) {
+            TokenResponseDTO tokenResponseDTO = authService.refreshJwtTokens(userDetails.getUsername()).get();
             return ResponseEntity
                     .ok()
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenResponseDTO.getAccessToken()))
@@ -70,16 +70,14 @@ public class AuthController {
     @DeleteMapping("/sign-out")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request) {
         String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        authService.logout(Long.parseLong(userDetails.getUsername()), accessToken.split(" ")[1]);
+        authService.logout(userDetails.getUsername(), accessToken.split(" ")[1]);
         URI location = ServletUriComponentsBuilder
                 .fromUriString("/")
                 .build().toUri();
 
         return ResponseEntity
                 .noContent()
-                .headers(httpHeaders -> {
-                    httpHeaders.setLocation(location); // 홈페이지 명시
-                })
+                .headers(httpHeaders -> httpHeaders.setLocation(location))
                 .build();
     }
 }
