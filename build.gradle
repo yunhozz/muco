@@ -66,6 +66,11 @@ project(':eureka-server') {
 	jar { enabled = false }
 }
 
+project(':api-gateway') {
+	bootJar { enabled = true }
+	jar { enabled = false }
+}
+
 project(':auth-service') {
 	bootJar { enabled = true }
 	jar { enabled = false }
