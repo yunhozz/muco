@@ -1,0 +1,14 @@
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('bootBuildImage') {
+	builder = 'paketobuildpacks/builder-jammy-base:latest'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
