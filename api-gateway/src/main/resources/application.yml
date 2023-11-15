@@ -7,14 +7,26 @@ server:
   port: 8000
 
 spring:
-  profiles:
-    include:
   application:
     name: api-gateway
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
       routes:
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/api/auth/**, /api/users/**
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: auth
+        url: /v3/api-docs/auth
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
