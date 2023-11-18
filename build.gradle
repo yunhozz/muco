@@ -71,6 +71,11 @@ project(':api-gateway') {
 	jar { enabled = false }
 }
 
+project(':config-server') {
+	bootJar { enabled = true }
+	jar { enabled = false }
+}
+
 project(':auth-service') {
 	bootJar { enabled = true }
 	jar { enabled = false }
