@@ -36,4 +36,9 @@ public class User extends BaseEntity {
         this.loginType = loginType;
         this.roles.add(Role.GUEST); // 처음 회원 등록 시 무조건 GUEST 권한 획득
     }
+
+    public void updateBySocialLogin(LoginType loginType) {
+        this.loginType = loginType;
+        roles.add(Role.USER);
+    }
 }

@@ -47,4 +47,9 @@ public class UserProfile extends BaseEntity {
 
         return userProfile;
     }
+
+    public void updateBySocialLogin(String name, String imageUrl) {
+        this.name = name;
+        this.imageUrl = imageUrl;
+    }
 }
