@@ -1,0 +1,64 @@
+version: '3'
+
+networks:
+  muco-network:
+
+services:
+  redis:
+    image: muco/redis:latest
+    command: redis-server
+    container_name: muco-redis
+    hostname: muco-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - muco-network
+
+  mysql:
+    image: muco/mysql:latest
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    container_name: muco-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - mysql.root.password=yh172839
+    volumes:
+      - ./data/mysql/:/var/lib/mysql
+    networks:
+      - muco-network
+
+  eureka-server:
+    image: muco/eureka-server:latest
+    container_name: muco-eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - muco-network
+
+  api-gateway:
+    image: muco/api-gateway:latest
+    container_name: muco-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://muco-eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - muco-network
+
+  auth-service:
+    image: muco/auth-service:latest
+    container_name: muco-auth-service
+    ports:
+      - "8090:8090"
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://muco-eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - redis
+      - mysql
+    networks:
+      - muco-network
