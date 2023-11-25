@@ -14,7 +14,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,37 +24,33 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.muco.authservice.global.config.PropertyConfig.MucoProperties;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
 
     private final UserDetailsServiceImpl userDetailsService;
-
-    @Value("${jwt.secretKey}")
-    private String secretKey;
-
-    @Value("${jwt.tokenType}")
-    private String tokenType;
-
-    @Value("${jwt.token.accessTokenValidTime}")
-    private Long accessTokenValidTime;
-
-    @Value("${jwt.token.refreshTokenValidTime}")
-    private Long refreshTokenValidTime;
+    private final MucoProperties mucoProperties;
 
     public TokenResponseDTO createJwtTokenDTO(String userId, Set<Role> roles) {
+        MucoProperties.Jwt jwtProperties = mucoProperties.getJwt();
+        String secretKey = jwtProperties.getSecretKey();
+        Long accessTokenValidTime = jwtProperties.getAccessTokenValidTime();
+        Long refreshTokenValidTime = jwtProperties.getRefreshTokenValidTime();
+
         Claims claims = Jwts.claims().setSubject(userId);
         String auth = roles.stream()
                 .map(Role::getAuthority)
                 .collect(Collectors.joining(","));
 
         claims.put("auth", auth);
-        String accessToken = createToken(claims, "atk", accessTokenValidTime);
-        String refreshToken = createToken(claims, "rtk", refreshTokenValidTime);
+        String accessToken = createToken(claims, secretKey, "atk", accessTokenValidTime);
+        String refreshToken = createToken(claims, secretKey, "rtk", refreshTokenValidTime);
 
         return TokenResponseDTO.builder()
-                .tokenType(tokenType)
+                .tokenType(jwtProperties.getTokenType())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .atkValidTime(accessTokenValidTime)
@@ -87,14 +82,14 @@ public class JwtProvider {
         return false;
     }
 
-    private String createToken(Claims claims, String type, Long validTime) {
+    private String createToken(Claims claims, String secretKey, String type, Long validTime) {
         claims.put("type", type);
         return Jwts.builder()
                 .setClaims(claims)
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + validTime))
-                .signWith(getSecretKey(), SignatureAlgorithm.HS256)
+                .signWith(getSecretKey(secretKey), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -105,7 +100,7 @@ public class JwtProvider {
                 .getBody();
     }
 
-    private Key getSecretKey() {
+    private Key getSecretKey(String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }

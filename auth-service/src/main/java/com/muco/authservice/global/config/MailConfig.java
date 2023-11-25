@@ -1,6 +1,6 @@
 package com.muco.authservice.global.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -8,28 +8,23 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
+import static com.muco.authservice.global.config.PropertyConfig.MucoProperties;
+
 @Configuration
+@RequiredArgsConstructor
 public class MailConfig {
 
-    @Value("${app.mail.host}")
-    private String host;
-
-    @Value("${app.mail.port}")
-    private int port;
-
-    @Value("${app.mail.username}")
-    private String username;
-
-    @Value("${app.mail.password}")
-    private String password;
+    private final MucoProperties mucoProperties;
 
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-        javaMailSender.setHost(host);
-        javaMailSender.setPort(port);
-        javaMailSender.setUsername(username);
-        javaMailSender.setPassword(password);
+        MucoProperties.Mail mailProperties = mucoProperties.getMail();
+
+        javaMailSender.setHost(mailProperties.getHost());
+        javaMailSender.setPort(mailProperties.getPort());
+        javaMailSender.setUsername(mailProperties.getUsername());
+        javaMailSender.setPassword(mailProperties.getPassword());
         javaMailSender.setJavaMailProperties(getMailProperties());
 
         return javaMailSender;
