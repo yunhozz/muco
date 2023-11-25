@@ -63,7 +63,7 @@ public class OAuth2Provider {
         return OAuth2Provider.builder()
                 .email((String) response.get("email"))
                 .name((String) response.get("name"))
-                .imageUrl((String) response.get("profile"))
+                .imageUrl((String) response.get("profile_image"))
                 .userNameAttributeName(userNameAttributeName)
                 .loginType(LoginType.NAVER)
                 .attributes(attributes)
