@@ -13,4 +13,6 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     Optional<UserProfile> findWithUserByEmail(@Param("email") String email);
 
     boolean existsUserProfileByEmail(String email);
+
+    boolean existsUserProfileByNickname(String nickname);
 }
