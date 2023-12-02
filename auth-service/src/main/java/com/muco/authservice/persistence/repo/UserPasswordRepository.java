@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface UserPasswordRepository extends JpaRepository<UserPassword, Long> {
 
     @Query("select up from UserPassword up join up.user u where u.id = :userId")
-    Optional<UserPassword> findByUserId(@Param("userId") Long userId);
+    Optional<UserPassword> findUserPasswordByUserId(@Param("userId") Long userId);
 
     @Modifying(clearAutomatically = true)
     @Query("update UserPassword up set up.retryCount = up.retryCount + 1 where up.id = :id")

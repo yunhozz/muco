@@ -80,7 +80,7 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
                     case 2 -> randomNickname.append((rnd.nextInt(10))); // 0~9
                 }
             }
-        } while (userProfileRepository.existsUserProfileByNickname(randomNickname.toString()));
+        } while (userProfileRepository.existsByNickname(randomNickname.toString()));
 
         return randomNickname.toString();
     }

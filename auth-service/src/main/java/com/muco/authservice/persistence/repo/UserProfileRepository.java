@@ -12,7 +12,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     @Query("select up from UserProfile up join fetch up.user u where up.email = :email")
     Optional<UserProfile> findWithUserByEmail(@Param("email") String email);
 
-    boolean existsUserProfileByEmail(String email);
+    boolean existsByEmail(String email);
 
-    boolean existsUserProfileByNickname(String nickname);
+    boolean existsByNickname(String nickname);
 }

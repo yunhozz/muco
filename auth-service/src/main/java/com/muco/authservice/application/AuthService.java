@@ -39,7 +39,7 @@ public class AuthService {
         String password = dto.getPassword();
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
-        UserPassword userPassword = userPasswordRepository.findByUserId(user.getId())
+        UserPassword userPassword = userPasswordRepository.findUserPasswordByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("해당 유저의 패스워드가 존재하지 않습니다. User Email = " + email));
 
         validatePassword(password, userPassword); // 비밀번호 검증

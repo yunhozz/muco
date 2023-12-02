@@ -41,7 +41,7 @@ public class UserService {
         String password1 = dto.getPassword1();
         String password2 = dto.getPassword2();
 
-        if (userProfileRepository.existsUserProfileByEmail(email)) {
+        if (userProfileRepository.existsByEmail(email)) {
             throw new RuntimeException("중복되는 이메일이 존재합니다. Email = " + email);
         }
         if (!password1.equals(password2)) {
