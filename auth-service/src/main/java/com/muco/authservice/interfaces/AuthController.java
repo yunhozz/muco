@@ -33,16 +33,16 @@ public class AuthController {
     @PostMapping("/sign-in")
     public ResponseEntity<String> login(@Valid @RequestBody SignInRequestDTO dto, HttpServletRequest request) {
         TokenResponseDTO tokenResponseDTO = authService.login(dto);
-        String referer = request.getHeader("Referer");
-        URI location = ServletUriComponentsBuilder
+        String referer = request.getHeader(HttpHeaders.REFERER);
+        URI prevPage = ServletUriComponentsBuilder
                 .fromUriString(referer != null ? referer : "/")
                 .build().toUri();
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .headers(httpHeaders -> {
-                    httpHeaders.setLocation(location); // 로그인 직전 페이지 명시
-                    httpHeaders.setBearerAuth(tokenResponseDTO.getAccessToken());
+                .headers(h -> {
+                    h.setLocation(prevPage); // 로그인 직전 페이지 명시
+                    h.setBearerAuth(tokenResponseDTO.getAccessToken());
                 })
                 .body("이메일 로그인 성공!! Access Token : " + tokenResponseDTO.getAccessToken());
     }
@@ -50,16 +50,16 @@ public class AuthController {
     @GetMapping("/token")
     public ResponseEntity<String> getAccessTokenBySocialLogin(@RequestParam String token, @RequestParam String error, HttpServletRequest request) {
         if (StringUtils.isNotBlank(token)) {
-            String referer = request.getHeader("Referer");
-            URI location = ServletUriComponentsBuilder
+            String referer = request.getHeader(HttpHeaders.REFERER);
+            URI prevPage = ServletUriComponentsBuilder
                     .fromUriString(referer != null ? referer : "/")
                     .build().toUri();
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .headers(httpHeaders -> {
-                        httpHeaders.setLocation(location); // 로그인 직전 페이지 명시
-                        httpHeaders.setBearerAuth(token);
+                    .headers(h -> {
+                        h.setLocation(prevPage); // 로그인 직전 페이지 명시
+                        h.setBearerAuth(token);
                     })
                     .body("소셜 로그인 성공!! Access Token : " + token);
         } else {
@@ -75,17 +75,17 @@ public class AuthController {
             TokenResponseDTO tokenResponseDTO = authService.refreshJwtTokens(userDetails.getUsername()).get();
             return ResponseEntity
                     .ok()
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenResponseDTO.getAccessToken()))
+                    .headers(h -> h.setBearerAuth(tokenResponseDTO.getAccessToken()))
                     .body(tokenResponseDTO);
 
         } else {
             return ResponseEntity
                     .ok()
-                    .headers(httpHeaders -> {
+                    .headers(h -> {
                         URI loginPage = ServletUriComponentsBuilder
                                 .fromUriString("/sign-in")
                                 .build().toUri();
-                        httpHeaders.setLocation(loginPage);
+                        h.setLocation(loginPage);
                     })
                     .body("로그인을 다시 진행해주세요.");
         }
@@ -95,13 +95,13 @@ public class AuthController {
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request) {
         String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         authService.logout(userDetails.getUsername(), accessToken.split(" ")[1]);
-        URI location = ServletUriComponentsBuilder
+        URI homePage = ServletUriComponentsBuilder
                 .fromUriString("/")
                 .build().toUri();
 
         return ResponseEntity
                 .noContent()
-                .headers(httpHeaders -> httpHeaders.setLocation(location))
+                .headers(h -> h.setLocation(homePage))
                 .build();
     }
 }
