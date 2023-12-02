@@ -6,6 +6,7 @@ import com.muco.authservice.global.auth.jwt.JwtFilter;
 import com.muco.authservice.global.auth.jwt.JwtProvider;
 import com.muco.authservice.global.auth.oauth.OAuth2AuthenticationFailureHandler;
 import com.muco.authservice.global.auth.oauth.OAuth2AuthenticationSuccessHandler;
+import com.muco.authservice.global.auth.oauth.OAuth2AuthorizationRequestCookieRepository;
 import com.muco.authservice.global.auth.oauth.OAuth2UserServiceImpl;
 import com.muco.authservice.global.auth.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class SecurityConfig {
 
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private final OAuth2AuthorizationRequestCookieRepository oAuth2AuthorizationRequestCookieRepository;
 
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -51,7 +53,10 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userDetailsService)
                 .oauth2Login(ol -> {
-                    ol.authorizationEndpoint(ep -> ep.baseUri("/oauth2/authorization"));
+                    ol.authorizationEndpoint(ep -> {
+                        ep.baseUri("/oauth2/authorization");
+                        ep.authorizationRequestRepository(oAuth2AuthorizationRequestCookieRepository);
+                    });
                     ol.redirectionEndpoint(ep -> ep.baseUri("/oauth2/callback/*"));
                     ol.userInfoEndpoint(ep -> ep.userService(oAuth2UserService));
                     ol.successHandler(oAuth2AuthenticationSuccessHandler);
