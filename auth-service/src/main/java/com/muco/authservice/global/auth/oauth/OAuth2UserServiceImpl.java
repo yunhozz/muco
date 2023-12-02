@@ -68,11 +68,10 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
     }
 
     private String createRandomNickname() {
-        String nickname;
-        while (true) {
-            StringBuilder randomNickname = new StringBuilder();
+        StringBuilder randomNickname;
+        do {
+            randomNickname = new StringBuilder();
             Random rnd = new Random(System.currentTimeMillis());
-
             for (int i = 0; i < 8; i++) {
                 int index = rnd.nextInt(3);
                 switch (index) {
@@ -81,13 +80,8 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
                     case 2 -> randomNickname.append((rnd.nextInt(10))); // 0~9
                 }
             }
+        } while (userProfileRepository.existsUserProfileByNickname(randomNickname.toString()));
 
-            if (!userProfileRepository.existsUserProfileByNickname(randomNickname.toString())) {
-                nickname = randomNickname.toString();
-                break;
-            }
-        }
-
-        return nickname;
+        return randomNickname.toString();
     }
 }
