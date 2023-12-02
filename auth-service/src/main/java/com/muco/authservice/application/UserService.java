@@ -74,18 +74,18 @@ public class UserService {
             message.setText(text);
             mailSender.send(message);
 
+            redisUtils.saveValue(email, code, Duration.ofHours(1)); // 인증 유효시간 1시간으로 설정
+
         } catch (MailException | MessagingException e) {
             throw new RuntimeException("메일 전송에 실패하였습니다. 원인 : " + e.getLocalizedMessage());
         }
-
-        redisUtils.saveValue(email, code, Duration.ofHours(1)); // 인증 유효시간 1시간으로 설정
 
         return new SignUpResponseDTO(user.getId(), email);
     }
 
     private String createCode() {
         StringBuilder code = new StringBuilder();
-        Random rnd = new Random();
+        Random rnd = new Random(System.currentTimeMillis());
 
         for (int i = 0; i < 8; i++) { // 인증코드 8자리
             int index = rnd.nextInt(3); // 0~2 까지 랜덤
