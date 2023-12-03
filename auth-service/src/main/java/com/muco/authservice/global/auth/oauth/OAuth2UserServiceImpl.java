@@ -37,34 +37,32 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
         OAuth2Provider provider = OAuth2Provider.of(registrationId, userNameAttributeName, attributes);
-        final User[] users = joinOrUpdateUser(provider); // 기존 로컬 유저인 경우 업데이트 진행, 신규 유저인 경우 회원가입 진행
+        User user = joinOrUpdateUser(provider); // 기존 로컬 유저인 경우 업데이트 진행, 신규 유저인 경우 회원가입 진행
 
-        return UserDetailsImpl.ofSocial(users[0].getId(), users[0].getRoles(), attributes);
+        return UserDetailsImpl.ofSocial(user.getId(), user.getRoles(), attributes);
     }
 
-    private User[] joinOrUpdateUser(OAuth2Provider provider) {
-        final User[] users = {null};
-        userProfileRepository.findWithUserByEmail(provider.getEmail()).ifPresentOrElse(userProfile -> {
-            User user = userProfile.getUser();
-            user.updateBySocialLogin(provider.getLoginType());
-            userProfile.updateBySocialLogin(provider.getName(), provider.getImageUrl());
-            users[0] = user;
-        }, () -> {
-            User user = new User(provider.getLoginType());
-            UserProfile userProfile = UserProfile.createUserProfile(
-                    user,
-                    provider.getEmail(),
-                    provider.getName(),
-                    -1,
-                    createRandomNickname(),
-                    provider.getImageUrl()
-            );
-            userRepository.save(user);
-            userProfileRepository.save(userProfile);
-            users[0] = user;
-        });
-
-        return users;
+    private User joinOrUpdateUser(OAuth2Provider provider) {
+        return userProfileRepository.findWithUserByEmail(provider.getEmail())
+                .map(userProfile -> {
+                    User user = userProfile.getUser();
+                    user.updateBySocialLogin(provider.getLoginType());
+                    userProfile.updateBySocialLogin(provider.getName(), provider.getImageUrl());
+                    return user;
+                }).orElseGet(() -> {
+                    User user = new User(provider.getLoginType());
+                    UserProfile userProfile = UserProfile.createUserProfile(
+                            user,
+                            provider.getEmail(),
+                            provider.getName(),
+                            -1,
+                            createRandomNickname(),
+                            provider.getImageUrl()
+                    );
+                    userRepository.save(user);
+                    userProfileRepository.save(userProfile);
+                    return user;
+                });
     }
 
     private String createRandomNickname() {

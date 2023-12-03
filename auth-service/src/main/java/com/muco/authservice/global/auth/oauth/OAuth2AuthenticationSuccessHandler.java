@@ -47,22 +47,20 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     @Override
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        String[] redirectUris = {null};
-        CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
-                .ifPresentOrElse(cookie -> {
-                    String redirectUri = cookie.getValue();
-                    if (!isAuthorizedRedirectUri(redirectUri))
+        String redirectUri = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
+                .map(cookie -> {
+                    String uri = cookie.getValue();
+                    if (!isAuthorizedRedirectUri(uri))
                         throw new RuntimeException("Unauthorized Redirect URI");
-                    redirectUris[0] = redirectUri;
-
-                }, () -> redirectUris[0] = getDefaultTargetUrl());
+                    return uri;
+                }).orElse(getDefaultTargetUrl());
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         TokenResponseDTO tokenResponseDTO = jwtProvider.createJwtTokenDTO(userDetails.getUsername(), userDetails.getRoles());
         RedisUtils.saveValue(userDetails.getUsername(), tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
 
         return ServletUriComponentsBuilder
-                .fromUriString(redirectUris[0])
+                .fromUriString(redirectUri)
                 .queryParam("token", tokenResponseDTO.getAccessToken())
                 .queryParam("error", "")
                 .toUriString();
