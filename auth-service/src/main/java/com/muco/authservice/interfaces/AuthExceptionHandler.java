@@ -16,6 +16,7 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleException(Exception e) {
+        log.error(e.getLocalizedMessage());
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(ErrorCode.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
         return ResponseEntity
                 .internalServerError()
@@ -24,15 +25,16 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponseDTO> handleAuthException(AuthException e) {
+        log.error(e.getLocalizedMessage());
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(e.getErrorCode(), e.getMessage());
         return ResponseEntity
-                .status(e.getErrorCode().getStatus())
+                .status(errorResponseDTO.getStatus())
                 .body(errorResponseDTO);
     }
 
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error(e.getLocalizedMessage());
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(ErrorCode.INVALID_REQUEST, e.getBindingResult());
         return ResponseEntity
                 .badRequest()
@@ -41,6 +43,7 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ErrorResponseDTO> handleHttpClientErrorException(HttpClientErrorException e) {
+        log.error(e.getLocalizedMessage());
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(ErrorCode.METHOD_NOT_ALLOWED, e.getLocalizedMessage());
         return ResponseEntity
                 .badRequest()

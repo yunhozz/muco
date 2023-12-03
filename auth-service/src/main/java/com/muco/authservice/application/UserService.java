@@ -1,6 +1,6 @@
 package com.muco.authservice.application;
 
-import com.muco.authservice.application.exception.MailDuplicateException;
+import com.muco.authservice.application.exception.EmailDuplicateException;
 import com.muco.authservice.application.exception.MailSendFailException;
 import com.muco.authservice.application.exception.PasswordDifferentException;
 import com.muco.authservice.global.dto.req.SignUpRequestDTO;
@@ -44,7 +44,7 @@ public class UserService {
         String password2 = dto.getPassword2();
 
         if (userProfileRepository.existsByEmail(email)) {
-            throw new MailDuplicateException("중복되는 이메일이 존재합니다. Email = " + email);
+            throw new EmailDuplicateException("중복되는 이메일이 존재합니다. Email = " + email);
         }
         if (!password1.equals(password2)) {
             throw new PasswordDifferentException("비밀번호를 다시 한번 확인해주세요.");
