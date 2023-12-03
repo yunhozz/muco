@@ -28,7 +28,6 @@ import static com.muco.authservice.global.config.PropertyConfig.MucoProperties;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
-    private final RedisUtils redisUtils;
     private final MucoProperties mucoProperties;
     private final OAuth2AuthorizationRequestCookieRepository oAuth2AuthorizationRequestCookieRepository;
 
@@ -60,7 +59,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         TokenResponseDTO tokenResponseDTO = jwtProvider.createJwtTokenDTO(userDetails.getUsername(), userDetails.getRoles());
-        redisUtils.saveValue(userDetails.getUsername(), tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
+        RedisUtils.saveValue(userDetails.getUsername(), tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
 
         return ServletUriComponentsBuilder
                 .fromUriString(redirectUris[0])

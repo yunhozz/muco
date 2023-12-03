@@ -32,7 +32,6 @@ public class UserService {
     private final UserPasswordRepository userPasswordRepository;
 
     private final JavaMailSender mailSender;
-    private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder encoder;
 
     @Transactional(noRollbackFor = { MailException.class, MessagingException.class }) // 메일 전송에 실패해도 일단 DB 에 회원 정보 저장
@@ -74,7 +73,7 @@ public class UserService {
             message.setText(text);
             mailSender.send(message);
 
-            redisUtils.saveValue(email, code, Duration.ofHours(1)); // 인증 유효시간 1시간으로 설정
+            RedisUtils.saveValue(email, code, Duration.ofHours(1)); // 인증 유효시간 1시간으로 설정
 
         } catch (MailException | MessagingException e) {
             throw new RuntimeException("메일 전송에 실패하였습니다. 원인 : " + e.getLocalizedMessage());

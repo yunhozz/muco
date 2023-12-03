@@ -9,7 +9,6 @@ import com.muco.authservice.global.util.RedisUtils;
 import com.muco.authservice.persistence.entity.User;
 import com.muco.authservice.persistence.entity.UserPassword;
 import com.muco.authservice.persistence.repo.UserPasswordRepository;
-import com.muco.authservice.persistence.repo.UserProfileRepository;
 import com.muco.authservice.persistence.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -26,11 +25,9 @@ import java.util.Set;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final UserProfileRepository userProfileRepository;
     private final UserPasswordRepository userPasswordRepository;
 
     private final JwtProvider jwtProvider;
-    private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
@@ -54,8 +51,8 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public Optional<TokenResponseDTO> refreshJwtTokens(String userId) {
-        if (redisUtils.getValue(userId).isPresent()) {
-            String refreshToken = redisUtils.getValue(userId).get();
+        if (RedisUtils.getValue(userId).isPresent()) {
+            String refreshToken = RedisUtils.getValue(userId).get();
             UserDetailsImpl userDetails = getUserDetails(refreshToken);
             return Optional.of(generateJwtToken(userDetails.getUsername(), userDetails.getRoles()));
 
@@ -66,15 +63,15 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public void logout(String userId, String token) {
-        redisUtils.getValue(userId).ifPresent(refreshToken -> {
-            redisUtils.deleteValue(userId);
-            redisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
+        RedisUtils.getValue(userId).ifPresent(refreshToken -> {
+            RedisUtils.deleteValue(userId);
+            RedisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
         });
     }
 
     private TokenResponseDTO generateJwtToken(String userId, Set<Role> roles) {
         TokenResponseDTO tokenResponseDTO = jwtProvider.createJwtTokenDTO(userId, roles);
-        redisUtils.saveValue(userId, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
+        RedisUtils.saveValue(userId, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
         return tokenResponseDTO;
     }
 
