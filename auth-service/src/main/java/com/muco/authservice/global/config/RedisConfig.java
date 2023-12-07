@@ -1,6 +1,6 @@
 package com.muco.authservice.global.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,19 +10,19 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import static com.muco.authservice.global.config.PropertyConfig.MucoProperties;
+
 @Configuration
 @EnableCaching
+@RequiredArgsConstructor
 public class RedisConfig {
 
-    @Value("${app.redis.host}")
-    private String host;
-
-    @Value("${app.redis.port}")
-    private int port;
+    private final MucoProperties mucoProperties;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        MucoProperties.Redis redisProperties = mucoProperties.getRedis();
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort()));
     }
 
     @Bean

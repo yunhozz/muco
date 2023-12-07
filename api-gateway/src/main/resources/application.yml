@@ -1,24 +1,9 @@
-eureka:
-  client:
-    service-url:
-      default-zone: http://localhost:8761/eureka
-
 server:
   port: 8000
 
 spring:
-  application:
-    name: api-gateway
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-      routes:
-        - id: auth-service
-          uri: lb://AUTH-SERVICE
-          predicates:
-            - Path=/api/auth/**, /api/users/**
+  profiles:
+    active: dev
 
 springdoc:
   swagger-ui:

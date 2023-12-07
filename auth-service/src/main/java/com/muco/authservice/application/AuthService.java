@@ -1,5 +1,8 @@
 package com.muco.authservice.application;
 
+import com.muco.authservice.application.exception.PasswordDifferentException;
+import com.muco.authservice.application.exception.PasswordInputExcessException;
+import com.muco.authservice.application.exception.UserNotFoundException;
 import com.muco.authservice.global.auth.jwt.JwtProvider;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
 import com.muco.authservice.global.dto.req.SignInRequestDTO;
@@ -9,7 +12,6 @@ import com.muco.authservice.global.util.RedisUtils;
 import com.muco.authservice.persistence.entity.User;
 import com.muco.authservice.persistence.entity.UserPassword;
 import com.muco.authservice.persistence.repo.UserPasswordRepository;
-import com.muco.authservice.persistence.repo.UserProfileRepository;
 import com.muco.authservice.persistence.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -26,11 +28,9 @@ import java.util.Set;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final UserProfileRepository userProfileRepository;
     private final UserPasswordRepository userPasswordRepository;
 
     private final JwtProvider jwtProvider;
-    private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
@@ -38,9 +38,9 @@ public class AuthService {
         String email = dto.getEmail();
         String password = dto.getPassword();
         User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
-        UserPassword userPassword = userPasswordRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("해당 유저의 패스워드가 존재하지 않습니다. User Email = " + email));
+                .orElseThrow(() -> new UserNotFoundException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
+        UserPassword userPassword = userPasswordRepository.findUserPasswordByUserId(user.getId())
+                .orElseThrow(() -> new UserNotFoundException("해당 유저의 패스워드가 존재하지 않습니다. User Email = " + email));
 
         validatePassword(password, userPassword); // 비밀번호 검증
 
@@ -54,8 +54,8 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public Optional<TokenResponseDTO> refreshJwtTokens(String userId) {
-        if (redisUtils.getValue(userId).isPresent()) {
-            String refreshToken = redisUtils.getValue(userId).get();
+        if (RedisUtils.getValue(userId).isPresent()) {
+            String refreshToken = RedisUtils.getValue(userId).get();
             UserDetailsImpl userDetails = getUserDetails(refreshToken);
             return Optional.of(generateJwtToken(userDetails.getUsername(), userDetails.getRoles()));
 
@@ -66,15 +66,15 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public void logout(String userId, String token) {
-        redisUtils.getValue(userId).ifPresent(refreshToken -> {
-            redisUtils.deleteValue(userId);
-            redisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
+        RedisUtils.getValue(userId).ifPresent(refreshToken -> {
+            RedisUtils.deleteValue(userId);
+            RedisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
         });
     }
 
     private TokenResponseDTO generateJwtToken(String userId, Set<Role> roles) {
         TokenResponseDTO tokenResponseDTO = jwtProvider.createJwtTokenDTO(userId, roles);
-        redisUtils.saveValue(userId, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
+        RedisUtils.saveValue(userId, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
         return tokenResponseDTO;
     }
 
@@ -88,9 +88,9 @@ public class AuthService {
             userPasswordRepository.addRetryCountById(userPassword.getId()); // 오류 카운트 + 1
             if (userPassword.isRetryCountMoreThan(5)) {
                 //TODO: 5회 이상 비밀번호 오류 시 해당 계정 로그인 제한
-                throw new RuntimeException("3회 이상 비밀번호를 잘못 입력하셨습니다.");
+                throw new PasswordInputExcessException("5회 이상 비밀번호를 잘못 입력하셨습니다.");
             }
-            throw new RuntimeException("패스워드를 잘못 입력하셨습니다. Retry Count = " + userPassword.getRetryCount());
+            throw new PasswordDifferentException("패스워드를 잘못 입력하셨습니다. Retry Count = " + userPassword.getRetryCount());
         }
     }
 }

@@ -1,0 +1,5 @@
+FROM openjdk:17-jdk-slim
+RUN mkdir -p /var/app
+COPY . .
+ENTRYPOINT ["java", "-jar", "/build/libs/auth-service-0.0.1-SNAPSHOT.jar"]
+RUN apt-get update && apt-get install -y curl

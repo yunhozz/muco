@@ -35,8 +35,10 @@ public class ErrorResponseDTO {
     }
 
     private ErrorResponseDTO(ErrorCode errorCode, List<FieldErrorResponseDTO> fieldErrors) {
-        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(errorCode);
-        errorResponseDTO.fieldErrors = fieldErrors;
+        this.status = errorCode.getStatus();
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMessage();
+        this.fieldErrors = fieldErrors;
     }
 
     public static ErrorResponseDTO of(ErrorCode errorCode) {

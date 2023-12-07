@@ -1,5 +1,7 @@
 plugins {
-	id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
+	id 'java'
+	id 'org.springframework.boot' version '3.1.5'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 dependencies {
@@ -18,7 +20,10 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	// querydsl
-	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -32,22 +37,14 @@ tasks.named('test') {
 
 def querydslDir = "$buildDir/generated/querydsl"
 
-querydsl {
-	jpa = true
-	querydslSourcesDir = querydslDir
-}
-
 sourceSets {
-	main.java.srcDir querydslDir
+	main.java.srcDirs += [ querydslDir ]
 }
 
-compileQuerydsl {
-	options.annotationProcessorPath = configurations.querydsl
+tasks.withType(JavaCompile) {
+	options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-	querydsl.extendsFrom compileClasspath
+clean.doLast {
+	file(querydslDir).deleteDir()
 }

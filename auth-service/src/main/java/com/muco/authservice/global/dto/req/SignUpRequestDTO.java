@@ -29,6 +29,5 @@ public class SignUpRequestDTO {
     @NotBlank
     private String nickname;
 
-    @NotBlank
     private String imageUrl;
 }

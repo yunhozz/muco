@@ -1,4 +1,5 @@
 rootProject.name = 'muco'
-include('eureka-server')
-include('api-gateway')
-include('auth-service')
+include ':eureka-server'
+include ':api-gateway'
+include ':config-server'
+include ':auth-service'
