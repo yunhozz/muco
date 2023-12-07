@@ -1,10 +1,14 @@
 package com.muco.authservice.application;
 
 import com.muco.authservice.application.exception.EmailDuplicateException;
+import com.muco.authservice.application.exception.EmailVerifyFailException;
 import com.muco.authservice.application.exception.MailSendFailException;
 import com.muco.authservice.application.exception.PasswordDifferentException;
+import com.muco.authservice.application.exception.UserNotFoundException;
+import com.muco.authservice.application.exception.VerifyingCodeNotFoundException;
 import com.muco.authservice.global.dto.req.SignUpRequestDTO;
 import com.muco.authservice.global.dto.res.SignUpResponseDTO;
+import com.muco.authservice.global.dto.res.UserResponseDTO;
 import com.muco.authservice.global.enums.LoginType;
 import com.muco.authservice.global.util.RedisUtils;
 import com.muco.authservice.persistence.entity.User;
@@ -77,13 +81,28 @@ public class UserService {
             messageHelper.setText(text, true);
             mailSender.send(message);
 
-            RedisUtils.saveValue(email, code, Duration.ofHours(1)); // 인증 유효시간 1시간으로 설정
+            RedisUtils.saveValue(email, code, Duration.ofHours(1)); // redis 에 인증 코드 저장
 
         } catch (MailException | MessagingException e) {
             throw new MailSendFailException("메일 전송에 실패하였습니다. 원인 : " + e.getLocalizedMessage());
         }
 
         return new SignUpResponseDTO(user.getId(), email);
+    }
+
+    @Transactional
+    public UserResponseDTO verifyByCode(String email, String code) {
+        String verifyCode = RedisUtils.getValue(email)
+                .orElseThrow(() -> new VerifyingCodeNotFoundException("코드 유효 시간이 지났습니다. 다시 발급해주세요."));
+        if (!code.equals(verifyCode)) {
+            throw new EmailVerifyFailException("입력하신 인증 코드가 일치하지 않습니다. 다시 입력해주세요.");
+        }
+
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
+        user.addUserByEmailVerify();
+
+        return new UserResponseDTO(user);
     }
 
     private String createCode() {
