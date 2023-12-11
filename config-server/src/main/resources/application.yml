@@ -2,5 +2,17 @@ server:
   port: 8888
 
 spring:
-  profiles:
-    active: dev
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: git@github.com:yunhozz/config-repository.git
+          search-paths: muco-config-file/**
+          default-label: master
+          ignore-local-ssh-settings: true
+          strict-host-key-checking: false
+          host-key: AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+          host-key-algorithm: ecdsa-sha2-nistp256
+          private-key: ENC(NJ3r2CODJjh9tTTJVVqR8Q9twayEFINBGN9aWQ7iwkyFT34QOgnx9VR2ux7g1lYooCWY5GccaS99aprQemaajUTT3niCSh4M9/EfQohDEnefcz7+7rRLT+JFWBQrz4bKtmXTMrG8/gNgFkv08Hv/grZFIpx7lLPlfggxI7G4a7WJevzmLu6hXZICDTc1D6CmBhbQY8eI1Rw5vIetPshloq3yoro/lKpePoCXbB8P03cZVaXDdBCqqZ3ewzdO8Kl0fu8/7YBAqCIcL+VhJOpeM7XroWC1zCng1bPzGOVOjlK8ebpsSquOcrMoaoZVxrcS)

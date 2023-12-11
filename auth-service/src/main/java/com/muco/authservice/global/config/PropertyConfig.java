@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
 public class PropertyConfig {
 
     @Getter
+    @RefreshScope
     @ConfigurationProperties(prefix = "muco")
     public static class MucoProperties {
         private final Jwt jwt = new Jwt();

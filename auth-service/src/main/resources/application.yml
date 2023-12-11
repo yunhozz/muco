@@ -5,3 +5,5 @@ spring:
   profiles:
     active: dev
     include: jwt, oauth, mail
+  config:
+    import: optional:configserver:http://localhost:8888
