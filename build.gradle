@@ -33,10 +33,10 @@ subprojects {
 	}
 
 	dependencies {
-		// devtools
+		/* devtools */
 		developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-		// lombok
+		/* lombok */
 		compileOnly 'org.projectlombok:lombok:1.18.26'
 		annotationProcessor "org.projectlombok:lombok:1.18.26"
 		testCompileOnly 'org.projectlombok:lombok:1.18.26'
@@ -65,6 +65,11 @@ project(':api-gateway') {
 }
 
 project(':auth-service') {
+	bootJar { enabled = true }
+	jar { enabled = true }
+}
+
+project(':music-service') {
 	bootJar { enabled = true }
 	jar { enabled = true }
 }
