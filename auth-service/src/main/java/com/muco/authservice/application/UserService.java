@@ -14,6 +14,7 @@ import com.muco.authservice.global.util.RedisUtils;
 import com.muco.authservice.persistence.entity.User;
 import com.muco.authservice.persistence.entity.UserPassword;
 import com.muco.authservice.persistence.entity.UserProfile;
+import com.muco.authservice.persistence.query.UserInfoQueryDTO;
 import com.muco.authservice.persistence.repo.UserPasswordRepository;
 import com.muco.authservice.persistence.repo.UserProfileRepository;
 import com.muco.authservice.persistence.repo.UserRepository;
@@ -103,6 +104,12 @@ public class UserService {
         user.addUserByEmailVerify();
 
         return new UserResponseDTO(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoQueryDTO findUserInformationById(Long id) {
+        return userProfileRepository.findUserInfoById(id)
+                .orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다. id = " + id));
     }
 
     private String createCode() {
