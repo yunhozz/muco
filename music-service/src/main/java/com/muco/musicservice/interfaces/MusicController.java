@@ -30,17 +30,17 @@ public class MusicController {
     private final MusicService musicService;
 
     @PostMapping
-    public ResponseEntity<Object> createMusic(@Valid @RequestBody CreateMusicSimpleRequestDTO dto) throws JsonProcessingException {
-        RestTemplate restTemplate = new RestTemplate();
-        ObjectMapper objectMapper = new ObjectMapper();
-
+    public ResponseEntity<Long> createMusic(@Valid @RequestBody CreateMusicSimpleRequestDTO dto) throws JsonProcessingException {
         String userInfoRequestUri = UriComponentsBuilder
                 .fromUriString("http://localhost:8000/api/users/{id}")
                 .build()
                 .expand(dto.getUserId())
                 .encode().toString();
 
+        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Object> obj = restTemplate.getForEntity(userInfoRequestUri, Object.class);
+
+        ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> userInfo = objectMapper.readValue(obj.toString(), new TypeReference<>() {});
         CreateMusicRequestDTO createMusicRequestDTO = CreateMusicRequestDTO.builder()
                 .userId(Long.parseLong(userInfo.get("id")))
