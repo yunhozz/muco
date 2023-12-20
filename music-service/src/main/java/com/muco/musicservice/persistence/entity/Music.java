@@ -40,7 +40,7 @@ public class Music extends BaseEntity {
 
     private int ranking;
 
-    public Music(String name, List<Genre> genres, String lyrics, int playCount, int likeCount, int ranking) {
+    private Music(String name, List<Genre> genres, String lyrics, int playCount, int likeCount, int ranking) {
         this.name = name;
         this.genres = genres;
         this.lyrics = lyrics;
