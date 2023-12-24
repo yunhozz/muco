@@ -6,6 +6,7 @@ import com.muco.authservice.global.dto.req.SignUpRequestDTO;
 import com.muco.authservice.global.dto.res.SignUpResponseDTO;
 import com.muco.authservice.global.dto.res.UserResponseDTO;
 import com.muco.authservice.global.util.CookieUtils;
+import com.muco.authservice.interfaces.dto.ResponseDTO;
 import com.muco.authservice.persistence.query.UserInfoQueryDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,18 +34,18 @@ public class UserController {
     private final static int EMAIL_COOKIE_MAX_AGE = 3600;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<SignUpResponseDTO> joinByEmail(
+    public ResponseEntity<ResponseDTO<SignUpResponseDTO>> joinByEmail(
             @Valid @RequestBody SignUpRequestDTO dto,
             HttpServletResponse response
     ) {
         SignUpResponseDTO signUpResponseDTO = userService.joinByEmail(dto);
         CookieUtils.addCookie(response, EMAIL_COOKIE_NAME, CookieUtils.serialize(signUpResponseDTO.getEmail()), EMAIL_COOKIE_MAX_AGE);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(signUpResponseDTO);
+                .body(ResponseDTO.of("이메일 가입에 성공하였습니다.", signUpResponseDTO));
     }
 
     @PatchMapping("/verification")
-    public ResponseEntity<UserResponseDTO> giveUserRoleByEmailVerifying(
+    public ResponseEntity<ResponseDTO<UserResponseDTO>> giveUserRoleByEmailVerifying(
             @Valid @RequestBody CodeRequestDTO dto,
             HttpServletRequest request,
             HttpServletResponse response
@@ -55,12 +56,12 @@ public class UserController {
         CookieUtils.deleteCookie(request, response, EMAIL_COOKIE_NAME);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userResponseDTO);
+                .body(ResponseDTO.of("이메일 인증에 성공하였습니다.", userResponseDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserInfoQueryDTO> getUserInfoById(@PathVariable String id) {
+    public ResponseEntity<ResponseDTO<UserInfoQueryDTO>> getUserInfoById(@PathVariable String id) {
         UserInfoQueryDTO userInfoQueryDTO = userService.findUserInformationById(Long.parseLong(id));
-        return ResponseEntity.ok(userInfoQueryDTO);
+        return ResponseEntity.ok(ResponseDTO.of("사용자 조회에 성공하였습니다.", userInfoQueryDTO));
     }
 }

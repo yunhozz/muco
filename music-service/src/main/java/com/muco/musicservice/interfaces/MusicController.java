@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.muco.musicservice.application.MusicService;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
-import com.muco.musicservice.global.dto.request.CreateMusicSimpleRequestDTO;
+import com.muco.musicservice.interfaces.dto.CreateMusicSimpleRequestDTO;
+import com.muco.musicservice.interfaces.dto.ResponseDTO;
+import com.muco.musicservice.interfaces.dto.UserInfoClientDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -20,8 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/music")
 @RequiredArgsConstructor
@@ -30,24 +30,24 @@ public class MusicController {
     private final MusicService musicService;
 
     @PostMapping
-    public ResponseEntity<Long> createMusic(@Valid @RequestBody CreateMusicSimpleRequestDTO dto) throws JsonProcessingException {
+    public ResponseEntity<ResponseDTO<Long>> createMusic(@Valid @RequestBody CreateMusicSimpleRequestDTO dto) throws JsonProcessingException {
         String userInfoRequestUri = UriComponentsBuilder
                 .fromUriString("http://localhost:8000/api/users/{id}")
                 .build()
                 .expand(dto.getUserId())
                 .encode().toString();
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Object> obj = restTemplate.getForEntity(userInfoRequestUri, Object.class);
+        ResponseEntity<ResponseDTO> response = new RestTemplate().getForEntity(userInfoRequestUri, ResponseDTO.class);
+        ResponseDTO<UserInfoClientDTO> userInfoResponse = new ObjectMapper()
+                .readValue(response.getBody().toString(), new TypeReference<>() {});
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> userInfo = objectMapper.readValue(obj.toString(), new TypeReference<>() {});
+        UserInfoClientDTO userInfo = userInfoResponse.getData();
         CreateMusicRequestDTO createMusicRequestDTO = CreateMusicRequestDTO.builder()
-                .userId(Long.parseLong(userInfo.get("id")))
-                .email(userInfo.get("email"))
-                .age(Integer.parseInt(userInfo.get("age")))
-                .nickname(userInfo.get("nickname"))
-                .userImageUrl(userInfo.get("imageUrl"))
+                .userId(Long.parseLong(userInfo.getId()))
+                .email(userInfo.getEmail())
+                .age(Integer.parseInt(userInfo.getAge()))
+                .nickname(userInfo.getNickname())
+                .userImageUrl(userInfo.getImageUrl())
                 .genres(dto.getGenres())
                 .lyrics(dto.getLyrics())
                 .musicImageUrl(dto.getImageUrl())
@@ -56,17 +56,17 @@ public class MusicController {
         Long musicId = musicService.registerMusic(createMusicRequestDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(musicId);
+                .body(ResponseDTO.of("음악을 성공적으로 등록하였습니다.", musicId));
     }
 
     // TODO: 음원 단건, 리스트 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getMusicInformation(@PathVariable String id) {
+    public ResponseEntity<Void> getMusicInformation(@PathVariable String id) {
         return ResponseEntity.ok(null);
     }
 
     @GetMapping
-    public ResponseEntity<Slice<Object>> getMusicList() {
+    public ResponseEntity<Slice<Void>> getMusicList() {
         return ResponseEntity.ok(null);
     }
 }
