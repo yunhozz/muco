@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
 
-    INVALID_REQUEST(400, "U-0001", "Invalid request"),
-    INVALID_VALUE_TYPES(400, "U-0002", "Invalid value types"),
+    INVALID_REQUEST(400, "U-001", "Invalid request"),
+    INVALID_VALUE_TYPES(400, "U-002", "Invalid value types"),
     RESOURCE_NOT_FOUND(404, "U-004", "Resource not found"),
     METHOD_NOT_ALLOWED(405, "U-005", "Invalid Method"),
     PAYLOAD_TOO_LARGE(413, "U-013", "File size exceeds maximum limit"),
