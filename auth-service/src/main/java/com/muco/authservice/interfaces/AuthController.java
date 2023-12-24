@@ -4,6 +4,7 @@ import com.muco.authservice.application.AuthService;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
 import com.muco.authservice.global.dto.req.SignInRequestDTO;
 import com.muco.authservice.global.dto.res.TokenResponseDTO;
+import com.muco.authservice.interfaces.dto.ResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<String> login(@Valid @RequestBody SignInRequestDTO dto, HttpServletRequest request) {
+    public ResponseEntity<ResponseDTO<String>> login(@Valid @RequestBody SignInRequestDTO dto, HttpServletRequest request) {
         TokenResponseDTO tokenResponseDTO = authService.login(dto);
         String referer = request.getHeader(HttpHeaders.REFERER);
         URI prevPage = ServletUriComponentsBuilder
@@ -46,11 +47,11 @@ public class AuthController {
                     h.setLocation(prevPage);
                     h.setBearerAuth(tokenResponseDTO.getAccessToken());
                 })
-                .body("이메일 로그인 성공!! Access Token : " + tokenResponseDTO.getAccessToken());
+                .body(ResponseDTO.of("이메일 로그인에 성공하였습니다.", tokenResponseDTO.getAccessToken()));
     }
 
     @GetMapping("/token")
-    public ResponseEntity<String> getAccessTokenBySocialLogin(
+    public ResponseEntity<ResponseDTO<Object>> getAccessTokenBySocialLogin(
             @RequestParam String token,
             @RequestParam String error,
             HttpServletRequest request
@@ -58,24 +59,24 @@ public class AuthController {
         if (StringUtils.isNotBlank(token)) {
             return ResponseEntity.ok()
                     .headers(h -> h.setBearerAuth(token))
-                    .body("소셜 로그인 성공!! Access Token : " + token);
+                    .body(ResponseDTO.of("소셜 로그인에 성공하였습니다.", token));
         } else {
             return ResponseEntity.badRequest()
-                    .body(error);
+                    .body(ResponseDTO.of(error));
         }
     }
 
     @GetMapping("/token/reissue")
-    public ResponseEntity<Object> refreshToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ResponseDTO<Object>> refreshToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (authService.refreshJwtTokens(userDetails.getUsername()).isPresent()) {
             TokenResponseDTO tokenResponseDTO = authService.refreshJwtTokens(userDetails.getUsername()).get();
             return ResponseEntity.ok()
                     .headers(h -> h.setBearerAuth(tokenResponseDTO.getAccessToken()))
-                    .body(tokenResponseDTO);
+                    .body(ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", tokenResponseDTO));
 
         } else {
             return ResponseEntity.ok()
-                    .body("로그인을 다시 진행해주세요.");
+                    .body(ResponseDTO.of("로그인을 다시 진행해주세요."));
         }
     }
 
