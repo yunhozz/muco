@@ -29,7 +29,7 @@ public class UserProfileCustomRepositoryImpl implements UserProfileCustomReposit
                                 userProfile.imageUrl
                         ))
                         .from(userProfile)
-                        .join(user, userProfile.user)
+                        .join(userProfile.user, user)
                         .where(user.id.eq(id))
                         .fetchOne()
         );
