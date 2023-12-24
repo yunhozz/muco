@@ -40,16 +40,19 @@ public class Music extends BaseEntity {
 
     private int ranking;
 
-    private Music(String name, List<Genre> genres, String lyrics, int playCount, int likeCount, int ranking) {
+    private String imageUrl;
+
+    private Music(String name, List<Genre> genres, String lyrics, int playCount, int likeCount, int ranking, String imageUrl) {
         this.name = name;
         this.genres = genres;
         this.lyrics = lyrics;
         this.playCount = playCount;
         this.likeCount = likeCount;
         this.ranking = ranking;
+        this.imageUrl = imageUrl;
     }
 
-    public static Music create(String name, List<Genre> genres, String lyrics) {
-        return new Music(name, genres, lyrics, 0, 0, -1);
+    public static Music create(String name, List<Genre> genres, String lyrics, String imageUrl) {
+        return new Music(name, genres, lyrics, 0, 0, -1, imageUrl);
     }
 }
