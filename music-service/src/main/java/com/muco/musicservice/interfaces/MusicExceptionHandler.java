@@ -34,9 +34,8 @@ public class MusicExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ErrorResponseDTO> handleHttpClientErrorException(HttpClientErrorException e) {
         log.error(e.getLocalizedMessage());
-        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(ErrorCode.METHOD_NOT_ALLOWED, e.getLocalizedMessage());
         return ResponseEntity
                 .badRequest()
-                .body(errorResponseDTO);
+                .body(e.getResponseBodyAs(ErrorResponseDTO.class));
     }
 }
