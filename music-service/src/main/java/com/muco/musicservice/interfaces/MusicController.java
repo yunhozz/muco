@@ -37,11 +37,11 @@ public class MusicController {
                 .expand(dto.getUserId())
                 .encode().toString();
 
-        ResponseEntity<ResponseDTO> response = new RestTemplate().getForEntity(userInfoRequestUri, ResponseDTO.class);
-        ResponseDTO<UserInfoClientDTO> userInfoResponse = new ObjectMapper()
+        ResponseEntity<String> response = new RestTemplate().getForEntity(userInfoRequestUri, String.class);
+        ResponseDTO<UserInfoClientDTO> responseDTO = new ObjectMapper()
                 .readValue(response.getBody().toString(), new TypeReference<>() {});
 
-        UserInfoClientDTO userInfo = userInfoResponse.getData();
+        UserInfoClientDTO userInfo = responseDTO.getData();
         CreateMusicRequestDTO createMusicRequestDTO = CreateMusicRequestDTO.builder()
                 .userId(Long.parseLong(userInfo.getId()))
                 .email(userInfo.getEmail())
