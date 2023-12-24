@@ -1,6 +1,6 @@
-package com.muco.authservice.global.dto.res;
+package com.muco.musicservice.interfaces.dto;
 
-import com.muco.authservice.global.enums.ErrorCode;
+import com.muco.musicservice.global.enums.ErrorCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
