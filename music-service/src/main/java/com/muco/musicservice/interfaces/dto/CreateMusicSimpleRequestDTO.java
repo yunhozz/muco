@@ -1,4 +1,4 @@
-package com.muco.musicservice.global.dto.request;
+package com.muco.musicservice.interfaces.dto;
 
 import com.muco.musicservice.persistence.entity.Genre;
 import jakarta.validation.constraints.NotEmpty;

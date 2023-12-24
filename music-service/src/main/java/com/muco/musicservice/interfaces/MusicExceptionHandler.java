@@ -1,7 +1,7 @@
 package com.muco.musicservice.interfaces;
 
-import com.muco.musicservice.global.dto.response.ErrorResponseDTO;
 import com.muco.musicservice.global.enums.ErrorCode;
+import com.muco.musicservice.interfaces.dto.ErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
