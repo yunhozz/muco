@@ -1,7 +1,10 @@
 package com.muco.musicservice.persistence.repository;
 
-import com.muco.musicservice.global.dto.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.query.QMusicChartQueryDTO;
+import com.muco.musicservice.global.dto.response.query.LyricsSimpleQueryDTO;
+import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
+import com.muco.musicservice.global.dto.response.query.MusicSimpleQueryDTO;
+import com.muco.musicservice.global.dto.response.query.MusicianSimpleQueryDTO;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

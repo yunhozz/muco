@@ -1,7 +1,7 @@
 package com.muco.musicservice.application;
 
-import com.muco.musicservice.global.dto.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
+import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.persistence.entity.Music;
 import com.muco.musicservice.persistence.entity.MusicMusician;
 import com.muco.musicservice.persistence.entity.Musician;
