@@ -1,4 +1,4 @@
-package com.muco.musicservice.global.dto.query;
+package com.muco.musicservice.global.dto.response.query;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
