@@ -2,8 +2,10 @@ server:
   port: 8090
 
 spring:
+  application:
+    name: auth-service
   profiles:
     active: dev
-    include: jwt, oauth, mail
+    include: jwt, mail, oauth
   config:
-    import: optional:configserver:http://localhost:8888
+    import: configserver:http://localhost:8888
