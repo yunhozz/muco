@@ -1,10 +1,9 @@
 package com.muco.musicservice.persistence.repository;
 
-import com.muco.musicservice.global.dto.query.QMusicChartQueryDTO;
-import com.muco.musicservice.global.dto.response.query.LyricsSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicSimpleQueryDTO;
-import com.muco.musicservice.global.dto.response.query.MusicianSimpleQueryDTO;
+import com.muco.musicservice.global.dto.response.query.QMusicChartQueryDTO;
+import com.muco.musicservice.global.dto.response.query.QMusicSimpleQueryDTO;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static com.muco.musicservice.persistence.entity.QMusic.music;
@@ -56,7 +56,54 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
         return new SliceImpl<>(musicList, pageable, hasNext);
     }
 
+    @Override
+    public List<MusicSimpleQueryDTO> getMusicSimpleListByMusicName(String keyword) {
+        List<MusicSimpleQueryDTO> musicList = queryFactory
+                .select(new QMusicSimpleQueryDTO(
+                        music.id,
+                        music.name,
+                        musician.nickname,
+                        music.likeCount
+                ))
+                .from(musicMusician)
+                .join(musicMusician.music, music)
+                .join(musicMusician.musician, musician)
+                .where(music.name.contains(keyword))
+                .fetch();
+
+        sortByNumberOfKeywords(keyword, musicList);
+
+        return musicList;
+    }
+
+    @Override
+    public List<MusicSimpleQueryDTO> getMusicSimpleListByMusicianName(String keyword) {
+        List<MusicSimpleQueryDTO> musicList = queryFactory
+                .select(new QMusicSimpleQueryDTO(
+                        music.id,
+                        music.name,
+                        musician.nickname,
+                        music.likeCount
+                ))
+                .from(musicMusician)
+                .join(musicMusician.music, music)
+                .join(musicMusician.musician, musician)
+                .where(musician.nickname.contains(keyword))
+                .fetch();
+
+        sortByNumberOfKeywords(keyword, musicList);
+
+        return musicList;
+    }
+
     private BooleanExpression musicRankingGt(Integer cursorRank) {
         return cursorRank != null ? music.ranking.gt(cursorRank) : null;
+    }
+
+    private static void sortByNumberOfKeywords(String keyword, List<MusicSimpleQueryDTO> musicList) {
+        musicList.sort(Comparator.comparingInt(music -> {
+            String musicName = music.getMusicName();
+            return musicName.length() - musicName.replace(keyword, "").length();
+        }));
     }
 }
