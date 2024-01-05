@@ -66,8 +66,8 @@ public class MusicController {
 
     @GetMapping("/search")
     public ResponseEntity<ResponseDTO<SearchResponseDTO>> getMusicListByKeyword(
-            @RequestParam(required = false, defaultValue = "total") String category,
-            @RequestParam String keyword
+        @RequestParam(required = false, defaultValue = "total") String category,
+        @RequestParam String keyword
     ) {
         SearchCategory searchCategory = SearchCategory.of(category);
         SearchResponseDTO searchResponseDTO = null;
