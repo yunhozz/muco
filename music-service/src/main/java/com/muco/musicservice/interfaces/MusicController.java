@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.muco.musicservice.application.MusicService;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
+import com.muco.musicservice.global.dto.response.SearchResponseDTO;
 import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.enums.SearchCategory;
 import com.muco.musicservice.interfaces.dto.CreateMusicSimpleRequestDTO;
@@ -63,16 +64,26 @@ public class MusicController {
                 .body(ResponseDTO.of("음악을 성공적으로 등록하였습니다.", musicId));
     }
 
-    // TODO: 음원 단건 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<Void> getMusicInformation(@PathVariable String id) {
-        return ResponseEntity.ok(null);
+    @GetMapping("/search")
+    public ResponseEntity<ResponseDTO<SearchResponseDTO>> getMusicListByKeyword(
+            @RequestParam(required = false, defaultValue = "total") String category,
+            @RequestParam String keyword
+    ) {
+        SearchCategory searchCategory = SearchCategory.of(category);
+        SearchResponseDTO searchResponseDTO = null;
+
+        switch (searchCategory) {
+            case TOTAL -> searchResponseDTO = musicService.getMusicListByMusicNameSearch(keyword);
+            // TODO: 곡, 아티스트, 가사 검색 추가
+        }
+
+        return ResponseEntity.ok(ResponseDTO.of("키워드 검색 결과입니다.", searchResponseDTO));
     }
 
     @PostMapping("/chart")
     public ResponseEntity<ResponseDTO<Slice<MusicChartQueryDTO>>> getMusicChart(
-            @RequestParam(required = false) Integer cursorRank,
-            @PageableDefault(size = 20) Pageable pageable)
+        @RequestParam(required = false) Integer cursorRank,
+        @PageableDefault(size = 20) Pageable pageable)
     {
         Slice<MusicChartQueryDTO> musicChartList = musicService.getMusicChartList(cursorRank, pageable);
         return ResponseEntity.ok(ResponseDTO.of("음악 차트 조회에 성공하였습니다.", musicChartList));
