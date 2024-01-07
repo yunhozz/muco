@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.muco.musicservice.application.MusicService;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
+import com.muco.musicservice.global.dto.response.MusicListResponseDTO;
 import com.muco.musicservice.global.dto.response.SearchResponseDTO;
 import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.enums.SearchCategory;
@@ -27,6 +28,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/music")
@@ -74,27 +78,29 @@ public class MusicController {
      */
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseDTO getMusicListByKeyword(
-        @RequestParam(required = false, defaultValue = "total") String category,
-        @RequestParam String keyword
-    ) {
+    public ResponseDTO getMusicListByKeyword(@RequestParam(required = false, defaultValue = "total") String category, @RequestParam String keyword) {
         SearchCategory searchCategory = SearchCategory.of(category);
-        SearchResponseDTO data = null;
+        SearchResponseDTO dataByCategory = null;
+        List<SearchResponseDTO> dataByCategories = new ArrayList<>();
 
         switch (searchCategory) {
-            case TOTAL -> data = musicService.getMusicListByMusicNameSearch(keyword);
             // TODO: 곡, 아티스트, 가사 검색 추가
+            case TOTAL -> {
+                List<MusicListResponseDTO> data = musicService.getMusicListByKeywordSearchOnTotalCategory(keyword);
+                for (MusicListResponseDTO musicList : data) {
+                    dataByCategories.add(musicList);
+                }
+                return ResponseDTO.of("키워드 통합검색 결과입니다.", dataByCategories, List.class);
+            }
+            default -> {
+                return ResponseDTO.of("키워드 검색 결과가 존재하지 않습니다.");
+            }
         }
-
-        return ResponseDTO.of("키워드 검색 결과입니다.", data, SearchResponseDTO.class);
     }
 
     @PostMapping("/chart")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseDTO getMusicChart(
-        @RequestParam(required = false) Integer cursorRank,
-        @PageableDefault(size = 20) Pageable pageable)
-    {
+    public ResponseDTO getMusicChart(@RequestParam(required = false) Integer cursorRank, @PageableDefault(size = 20) Pageable pageable) {
         Slice<MusicChartQueryDTO> data = musicService.getMusicChartList(cursorRank, pageable);
         return ResponseDTO.of("음악 차트 조회 결과입니다.", data, Slice.class);
     }

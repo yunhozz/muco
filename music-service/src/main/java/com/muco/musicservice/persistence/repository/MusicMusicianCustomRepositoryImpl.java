@@ -4,6 +4,7 @@ import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicSimpleQueryDTO;
+import com.muco.musicservice.global.enums.SearchCategory;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +58,7 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
     }
 
     @Override
-    public List<MusicSimpleQueryDTO> getMusicSimpleListByMusicName(String keyword) {
+    public List<MusicSimpleQueryDTO> getMusicSimpleListByKeywordAndCategory(String keyword, SearchCategory category) {
         List<MusicSimpleQueryDTO> musicList = queryFactory
                 .select(new QMusicSimpleQueryDTO(
                         music.id,
@@ -68,27 +69,7 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .from(musicMusician)
                 .join(musicMusician.music, music)
                 .join(musicMusician.musician, musician)
-                .where(music.name.contains(keyword))
-                .fetch();
-
-        sortByNumberOfKeywords(keyword, musicList);
-
-        return musicList;
-    }
-
-    @Override
-    public List<MusicSimpleQueryDTO> getMusicSimpleListByMusicianName(String keyword) {
-        List<MusicSimpleQueryDTO> musicList = queryFactory
-                .select(new QMusicSimpleQueryDTO(
-                        music.id,
-                        music.name,
-                        musician.nickname,
-                        music.likeCount
-                ))
-                .from(musicMusician)
-                .join(musicMusician.music, music)
-                .join(musicMusician.musician, musician)
-                .where(musician.nickname.contains(keyword))
+                .where(keywordContainsBySearchCategory(keyword, category))
                 .fetch();
 
         sortByNumberOfKeywords(keyword, musicList);
@@ -98,6 +79,35 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
 
     private BooleanExpression musicRankingGt(Integer cursorRank) {
         return cursorRank != null ? music.ranking.gt(cursorRank) : null;
+    }
+
+    private BooleanExpression musicNameContainsBy(String keyword) {
+        return keyword != null ? music.name.contains(keyword) : null;
+    }
+
+    private BooleanExpression musicianNameContainsBy(String keyword) {
+        return keyword != null ? musician.nickname.contains(keyword) : null;
+    }
+
+    private BooleanExpression lyricsContainsBy(String keyword) {
+        return keyword != null ? music.lyrics.contains(keyword) : null;
+    }
+
+    private BooleanExpression keywordContainsBySearchCategory(String keyword, SearchCategory category) {
+        BooleanExpression expression = null;
+        if (category != null) {
+            switch (category) {
+                case MUSIC -> expression = musicNameContainsBy(keyword);
+                case MUSICIAN -> expression = musicianNameContainsBy(keyword);
+                case LYRICS -> expression = lyricsContainsBy(keyword);
+                default -> expression =
+                        musicNameContainsBy(keyword)
+                                .or(musicianNameContainsBy(keyword))
+                                .or(lyricsContainsBy(keyword));
+            }
+        }
+
+        return expression;
     }
 
     private static void sortByNumberOfKeywords(String keyword, List<MusicSimpleQueryDTO> musicList) {
