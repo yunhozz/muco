@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.muco.musicservice.persistence.entity.QMusic.music;
 import static com.muco.musicservice.persistence.entity.QMusicMusician.musicMusician;
@@ -72,7 +73,7 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .where(keywordContainsBySearchCategory(keyword, category))
                 .fetch();
 
-        sortByNumberOfKeywords(keyword, musicList);
+        musicList = sortByNumberOfKeywordsTop10(keyword, musicList);
 
         return musicList;
     }
@@ -110,10 +111,13 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
         return expression;
     }
 
-    private static void sortByNumberOfKeywords(String keyword, List<MusicSimpleQueryDTO> musicList) {
-        musicList.sort(Comparator.comparingInt(music -> {
-            String musicName = music.getMusicName();
-            return musicName.length() - musicName.replace(keyword, "").length();
-        }));
+    private static List<MusicSimpleQueryDTO> sortByNumberOfKeywordsTop10(String keyword, List<MusicSimpleQueryDTO> musicList) {
+        return musicList.stream()
+                .sorted(Comparator.comparingInt(music -> {
+                    String musicName = music.getMusicName();
+                    return musicName.length() - musicName.replace(keyword, "").length();
+                }))
+                .limit(10)
+                .collect(Collectors.toList());
     }
 }
