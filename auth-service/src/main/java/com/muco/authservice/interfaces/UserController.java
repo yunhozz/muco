@@ -14,13 +14,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,38 +30,35 @@ public class UserController {
 
     private final UserService userService;
 
-    private final static String EMAIL_COOKIE_NAME = "username";
-    private final static int EMAIL_COOKIE_MAX_AGE = 3600;
+    private static final String EMAIL_COOKIE_NAME = "username";
+    private static final int EMAIL_COOKIE_MAX_AGE = 3600;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<ResponseDTO<SignUpResponseDTO>> joinByEmail(
-            @Valid @RequestBody SignUpRequestDTO dto,
-            HttpServletResponse response
-    ) {
-        SignUpResponseDTO signUpResponseDTO = userService.joinByEmail(dto);
-        CookieUtils.addCookie(response, EMAIL_COOKIE_NAME, CookieUtils.serialize(signUpResponseDTO.getEmail()), EMAIL_COOKIE_MAX_AGE);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseDTO.of("이메일 가입에 성공하였습니다.", signUpResponseDTO));
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDTO joinByEmail(@Valid @RequestBody SignUpRequestDTO dto, HttpServletResponse response) {
+        SignUpResponseDTO data = userService.joinByEmail(dto);
+        CookieUtils.addCookie(response, EMAIL_COOKIE_NAME, CookieUtils.serialize(data.getEmail()), EMAIL_COOKIE_MAX_AGE);
+        return ResponseDTO.of("이메일 가입이 완료되었습니다.", data, SignUpResponseDTO.class);
     }
 
     @PatchMapping("/verification")
-    public ResponseEntity<ResponseDTO<UserResponseDTO>> giveUserRoleByEmailVerifying(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDTO giveUserRoleByEmailVerifying(
             @Valid @RequestBody CodeRequestDTO dto,
-            HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletRequest request, HttpServletResponse response
     ) {
         Cookie cookie = CookieUtils.getCookie(request, EMAIL_COOKIE_NAME)
                 .orElseThrow(() -> new IllegalArgumentException("유저 이메일에 대한 쿠키 정보가 존재하지 않습니다."));
-        UserResponseDTO userResponseDTO = userService.verifyByCode(CookieUtils.deserialize(cookie, String.class), dto.getCode());
+        UserResponseDTO data = userService.verifyByCode(CookieUtils.deserialize(cookie, String.class), dto.getCode());
         CookieUtils.deleteCookie(request, response, EMAIL_COOKIE_NAME);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseDTO.of("이메일 인증에 성공하였습니다.", userResponseDTO));
+        return ResponseDTO.of("인증에 성공하였습니다.", data, UserResponseDTO.class);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseDTO<UserInfoQueryDTO>> getUserInfoById(@PathVariable String id) {
-        UserInfoQueryDTO userInfoQueryDTO = userService.findUserInformationById(Long.parseLong(id));
-        return ResponseEntity.ok(ResponseDTO.of("사용자 조회에 성공하였습니다.", userInfoQueryDTO));
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseDTO getUserInfoById(@PathVariable String id) {
+        UserInfoQueryDTO data = userService.findUserInformationById(Long.parseLong(id));
+        return ResponseDTO.of("사용자 조회에 성공하였습니다.", data, UserInfoQueryDTO.class);
     }
 }

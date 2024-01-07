@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -35,53 +35,48 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<ResponseDTO<String>> login(@Valid @RequestBody SignInRequestDTO dto, HttpServletRequest request) {
-        TokenResponseDTO tokenResponseDTO = authService.login(dto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDTO login(@Valid @RequestBody SignInRequestDTO dto, HttpServletRequest request, HttpServletResponse response) {
+        TokenResponseDTO data = authService.login(dto);
         String referer = request.getHeader(HttpHeaders.REFERER);
         URI prevPage = ServletUriComponentsBuilder
                 .fromUriString(referer != null ? referer : "/")
                 .build().toUri();
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .headers(h -> {
-                    h.setLocation(prevPage);
-                    h.setBearerAuth(tokenResponseDTO.getAccessToken());
-                })
-                .body(ResponseDTO.of("이메일 로그인에 성공하였습니다.", tokenResponseDTO.getAccessToken()));
+        response.addHeader(HttpHeaders.LOCATION, String.valueOf(prevPage));
+        response.addHeader(HttpHeaders.AUTHORIZATION, data.getTokenType() + " " + data.getAccessToken());
+
+        return ResponseDTO.of("이메일 로그인에 성공하였습니다.", data.getAccessToken(), String.class);
     }
 
     @GetMapping("/token")
-    public ResponseEntity<ResponseDTO<Object>> getAccessTokenBySocialLogin(
-            @RequestParam String token,
-            @RequestParam String error,
-            HttpServletRequest request
-    ) {
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseDTO getAccessTokenBySocialLogin(@RequestParam String token, @RequestParam String error, HttpServletResponse response) {
         if (StringUtils.isNotBlank(token)) {
-            return ResponseEntity.ok()
-                    .headers(h -> h.setBearerAuth(token))
-                    .body(ResponseDTO.of("소셜 로그인에 성공하였습니다.", token));
+            response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+            return ResponseDTO.of("소셜 로그인에 성공하였습니다.", token, String.class);
         } else {
-            return ResponseEntity.badRequest()
-                    .body(ResponseDTO.of(error));
+            return ResponseDTO.of(error);
         }
     }
 
     @GetMapping("/token/reissue")
-    public ResponseEntity<ResponseDTO<Object>> refreshToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseDTO refreshToken(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletResponse response) {
         if (authService.refreshJwtTokens(userDetails.getUsername()).isPresent()) {
-            TokenResponseDTO tokenResponseDTO = authService.refreshJwtTokens(userDetails.getUsername()).get();
-            return ResponseEntity.ok()
-                    .headers(h -> h.setBearerAuth(tokenResponseDTO.getAccessToken()))
-                    .body(ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", tokenResponseDTO));
+            TokenResponseDTO data = authService.refreshJwtTokens(userDetails.getUsername()).get();
+            response.addHeader(HttpHeaders.AUTHORIZATION, data.getTokenType() + " " + data.getAccessToken());
+
+            return ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", data, TokenResponseDTO.class);
 
         } else {
-            return ResponseEntity.ok()
-                    .body(ResponseDTO.of("로그인을 다시 진행해주세요."));
+            return ResponseDTO.of("로그인을 다시 진행해주세요.");
         }
     }
 
     @DeleteMapping("/sign-out")
-    public ResponseEntity<Void> logout(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseDTO logout(
             @AuthenticationPrincipal Authentication authentication,
             HttpServletRequest request,
             HttpServletResponse response
@@ -92,7 +87,6 @@ public class AuthController {
 
         new SecurityContextLogoutHandler().logout(request, response, authentication);
 
-        return ResponseEntity.noContent()
-                .build();
+        return ResponseDTO.of("로그아웃에 성공하였습니다.");
     }
 }
