@@ -71,9 +71,10 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .join(musicMusician.music, music)
                 .join(musicMusician.musician, musician)
                 .where(keywordContainsBySearchCategory(keyword, category))
+                .orderBy(music.id.desc())
                 .fetch();
 
-        musicList = sortByNumberOfKeywordsTop10(keyword, musicList);
+        musicList = sortDescByNumberOfKeywordsTop10(keyword, musicList);
 
         return musicList;
     }
@@ -111,13 +112,17 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
         return expression;
     }
 
-    private static List<MusicSimpleQueryDTO> sortByNumberOfKeywordsTop10(String keyword, List<MusicSimpleQueryDTO> musicList) {
+    private static List<MusicSimpleQueryDTO> sortDescByNumberOfKeywordsTop10(String keyword, List<MusicSimpleQueryDTO> musicList) {
         return musicList.stream()
-                .sorted(Comparator.comparingInt(music -> {
-                    String musicName = music.getMusicName();
-                    return musicName.length() - musicName.replace(keyword, "").length();
-                }))
+                .sorted(Comparator.comparing(MusicSimpleQueryDTO::getMusicName, (n1, n2) -> compareByNumberOfKeywords(n1, n2, keyword))
+                                .thenComparing(MusicSimpleQueryDTO::getMusicianName, (n1, n2) -> compareByNumberOfKeywords(n1, n2 ,keyword)))
                 .limit(10)
                 .collect(Collectors.toList());
+    }
+
+    private static int compareByNumberOfKeywords(String n1, String n2, String keyword) {
+        int count1 = n1.length() - n1.replace(keyword, "").length();
+        int count2 = n2.length() - n2.replace(keyword, "").length();
+        return count2 - count1;
     }
 }
