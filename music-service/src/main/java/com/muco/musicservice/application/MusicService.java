@@ -4,6 +4,7 @@ import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
 import com.muco.musicservice.global.dto.response.MusicListResponseDTO;
 import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicSimpleQueryDTO;
+import com.muco.musicservice.global.enums.SearchCategory;
 import com.muco.musicservice.persistence.entity.Music;
 import com.muco.musicservice.persistence.entity.MusicMusician;
 import com.muco.musicservice.persistence.entity.Musician;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,16 +47,12 @@ public class MusicService {
     }
 
     @Transactional(readOnly = true)
-    public MusicListResponseDTO getMusicListByMusicNameSearch(String keyword) {
-        List<MusicSimpleQueryDTO> musicSimpleList = musicMusicianRepository.getMusicSimpleListByMusicName(keyword);
-        int totalCount = musicSimpleList.size();
-        return new MusicListResponseDTO(musicSimpleList, totalCount);
-    }
-
-    @Transactional(readOnly = true)
-    public MusicListResponseDTO getMusicListByMusicianNameSearch(String keyword) {
-        List<MusicSimpleQueryDTO> musicSimpleList = musicMusicianRepository.getMusicSimpleListByMusicianName(keyword);
-        int totalCount = musicSimpleList.size();
-        return new MusicListResponseDTO(musicSimpleList, totalCount);
+    public List<MusicListResponseDTO> getMusicListByKeywordSearchOnTotalCategory(String keyword) {
+        return new ArrayList<>() {{
+            for (SearchCategory category : SearchCategory.values()) {
+                List<MusicSimpleQueryDTO> musicList = musicMusicianRepository.getMusicSimpleListByKeywordAndCategory(keyword, category);
+                add(new MusicListResponseDTO(category, musicList.size(), musicList));
+            }
+        }};
     }
 }
