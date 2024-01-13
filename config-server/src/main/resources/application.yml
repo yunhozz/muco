@@ -13,12 +13,7 @@ spring:
           strict-host-key-checking: false
           host-key: AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLd0kCVKRfSTGnG6zztlnCW+Gqb9ynJUUezt+d7o2ys0nuhEWdt4gEdBNSwPh6NQCKDZ8XlR8y94Vvbw4OHTOAc=
           host-key-algorithm: ecdsa-sha2-nistp256
-          private-key: |
-            -----BEGIN EC PRIVATE KEY-----
-            MHcCAQEEIGcCKWRkieCBqisLIV+jnuJ1gNtOevmcfWm+bo9sWSTqoAoGCCqGSM49
-            AwEHoUQDQgAEt3SQJUpF9JMacbrPO2WcJb4apv3KclRR7O353ujbKzSe6ERZ23iA
-            R0E1LA+Ho1AIoNnxeVHzL3hW9vDg4dM4Bw==
-            -----END EC PRIVATE KEY-----
+          private-key: ${MUCO_PRIVATE_KEY}
         encrypt:
           enabled: false
 
