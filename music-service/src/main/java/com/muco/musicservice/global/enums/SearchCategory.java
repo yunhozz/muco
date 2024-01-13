@@ -7,8 +7,8 @@ public enum SearchCategory {
 
     TOTAL("total", "통합검색"),
     MUSIC("music", "곡"),
-    MUSICIAN("musician", "아티스트"),
-    LYRICS("lyrics", "가사");
+    MUSICIAN("artist", "아티스트"),
+    PLAYLIST("playlist", "재생목록");
 
     private final String category;
     private final String value;
