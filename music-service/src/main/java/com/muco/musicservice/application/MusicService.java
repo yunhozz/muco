@@ -30,8 +30,8 @@ public class MusicService {
 
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto) {
-        Musician musician = Musician.create(dto.getEmail(), dto.getAge(), dto.getNickname(), dto.getUserImageUrl());
-        Music music = Music.create(dto.getMusicName(), dto.getGenres(), dto.getLyrics(), dto.getMusicImageUrl());
+        Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
+        Music music = Music.create(dto.musicName(), dto.genres(), dto.lyrics(), dto.musicImageUrl());
         MusicMusician musicMusician = new MusicMusician(music, musician);
 
         musicRepository.save(music);

@@ -1,36 +1,27 @@
 package com.muco.musicservice.global.dto.request;
 
 import com.muco.musicservice.persistence.entity.Genre;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Getter;
 
 import java.util.List;
 
-@Getter
 @Builder
-@AllArgsConstructor
-public class CreateMusicRequestDTO {
-
-    private Long userId;
-
-    private String email;
-
-    private int age;
-
-    private String nickname;
-
-    private String userImageUrl;
-
-    private String musicName;
-
-    private List<Genre> genres;
-
-    private String lyrics;
-
-    private String musicImageUrl;
-
-    private CreateMusicRequestDTO() {
-        super();
-    }
-}
+public record CreateMusicRequestDTO(
+        @NotNull
+        Long userId,
+        @NotBlank
+        String email,
+        int age,
+        @NotBlank
+        String nickname,
+        String userImageUrl,
+        @NotBlank
+        String musicName,
+        @NotEmpty
+        List<Genre> genres,
+        String lyrics,
+        String musicImageUrl
+) {}
