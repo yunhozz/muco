@@ -23,9 +23,11 @@ public class Musician extends BaseEntity {
 
     private String nickname;
 
+    private int likeCount;
+
     private String imageUrl;
 
-    private Musician(String email, int age, String nickname, String imageUrl) {
+    private Musician(String email, int age, String nickname, int likeCount, String imageUrl) {
         this.email = email;
         this.age = age;
         this.nickname = nickname;
@@ -33,6 +35,6 @@ public class Musician extends BaseEntity {
     }
 
     public static Musician create(String email, int age, String nickname, String imageUrl) {
-        return new Musician(email, age, nickname, imageUrl);
+        return new Musician(email, age, nickname,0, imageUrl);
     }
 }
