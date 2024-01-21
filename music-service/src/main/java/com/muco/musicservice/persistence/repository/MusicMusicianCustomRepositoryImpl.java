@@ -87,11 +87,11 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .fetch();
 
         ListSorter<MusicSimpleQueryDTO> listSorter = (key, list) -> list.stream()
-                .sorted(Comparator.comparing(MusicSimpleQueryDTO::getMusicName, (n1, n2) -> compareByNumberOfKeywords(n1, n2, key))
-                        .thenComparing(MusicSimpleQueryDTO::getMusicianName, (n1, n2) -> compareByNumberOfKeywords(n1, n2 ,key)))
+                .sorted(Comparator.comparing(MusicSimpleQueryDTO::getMusicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false))
+                        .thenComparing(MusicSimpleQueryDTO::getMusicianName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2 ,key, false)))
                 .limit(10)
                 .collect(Collectors.toList());
-        musicList = listSorter.sortDescByNumberOfKeywords(keyword, musicList);
+        musicList = listSorter.sort(keyword, musicList);
 
         return musicList;
     }
@@ -120,9 +120,9 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
 
         if (condition.equals(SearchCondition.ACCURACY)) {
             ListSorter<MusicSearchQueryDTO> listSorter = (key, list) -> list.stream()
-                    .sorted(Comparator.comparing(MusicSearchQueryDTO::getMusicName, (n1, n2) -> compareByNumberOfKeywords(n1, n2, key)))
+                    .sorted(Comparator.comparing(MusicSearchQueryDTO::getMusicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
                     .collect(Collectors.toList());
-            musicSearchList = listSorter.sortDescByNumberOfKeywords(keyword, musicSearchList);
+            musicSearchList = listSorter.sort(keyword, musicSearchList);
         }
 
         return new PageImpl<>(musicSearchList, pageable, musicSearchList.size());
@@ -183,11 +183,5 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
 
     private BooleanExpression playlistNameContainsBy(String keyword) {
         return keyword != null ? userPlaylist.name.contains(keyword) : null;
-    }
-
-    private static int compareByNumberOfKeywords(String n1, String n2, String keyword) {
-        int count1 = n1.length() - n1.replace(keyword, "").length();
-        int count2 = n2.length() - n2.replace(keyword, "").length();
-        return count2 - count1;
     }
 }
