@@ -8,12 +8,15 @@ import com.muco.musicservice.global.dto.response.query.PlaylistSearchQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicSearchQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicSimpleQueryDTO;
+import com.muco.musicservice.global.dto.response.query.QMusicianSearchQueryDTO;
+import com.muco.musicservice.global.dto.response.query.QPlaylistSearchQueryDTO;
 import com.muco.musicservice.global.enums.SearchCategory;
 import com.muco.musicservice.global.enums.SearchCondition;
 import com.muco.musicservice.global.util.ListSorter;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -87,18 +90,18 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .fetch();
 
         ListSorter<MusicSimpleQueryDTO> listSorter = (key, list) -> list.stream()
-                .sorted(Comparator.comparing(MusicSimpleQueryDTO::getMusicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false))
-                        .thenComparing(MusicSimpleQueryDTO::getMusicianName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2 ,key, false)))
+                .sorted(Comparator.comparing(MusicSimpleQueryDTO::musicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false))
+                        .thenComparing(MusicSimpleQueryDTO::musicianName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2 ,key, false)))
                 .limit(10)
                 .collect(Collectors.toList());
-        musicList = listSorter.sort(keyword, musicList);
 
-        return musicList;
+        return listSorter.sort(keyword, musicList);
     }
 
     @Override
     public Page<MusicSearchQueryDTO> getMusicSearchPageByKeywordAndConditions(String keyword, SearchCondition condition, Pageable pageable) {
-        List<MusicSearchQueryDTO> musicSearchList = queryFactory
+        List<MusicSearchQueryDTO> musicSearchList;
+        JPAQuery<MusicSearchQueryDTO> musicSearchQuery = queryFactory
                 .select(new QMusicSearchQueryDTO(
                         music.id,
                         musician.id,
@@ -112,44 +115,107 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .from(musicMusician)
                 .join(musicMusician.music, music)
                 .join(musicMusician.musician, musician)
-                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSIC))
-                .orderBy(createOrderByConditionAndEntity(condition))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSIC));
 
         if (condition.equals(SearchCondition.ACCURACY)) {
+            musicSearchList = musicSearchQuery.fetch();
             ListSorter<MusicSearchQueryDTO> listSorter = (key, list) -> list.stream()
-                    .sorted(Comparator.comparing(MusicSearchQueryDTO::getMusicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
+                    .sorted(Comparator.comparing(MusicSearchQueryDTO::musicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
+                    .skip(pageable.getOffset())
+                    .limit(pageable.getPageSize())
                     .collect(Collectors.toList());
             musicSearchList = listSorter.sort(keyword, musicSearchList);
+        } else {
+            musicSearchList = musicSearchQuery
+                    .orderBy(createMusicOrderSpecifierByCondition(condition))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
         }
 
-        return new PageImpl<>(musicSearchList, pageable, musicSearchList.size());
-    }
+        Long total = queryFactory
+                .select(musicMusician.count())
+                .from(musicMusician)
+                .join(musicMusician.music, music)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSIC))
+                .fetchOne();
 
-    private OrderSpecifier<?>[] createOrderByConditionAndEntity(SearchCondition condition) {
-        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
-        switch (condition) {
-            case LATEST -> orderSpecifiers.add(new OrderSpecifier(Order.DESC, music.createdAt));
-            case ASCEND -> orderSpecifiers.add(new OrderSpecifier(Order.ASC, music.name));
-            case POPULARITY -> orderSpecifiers.add(new OrderSpecifier(Order.DESC, music.likeCount));
-            default -> {
-                return null;
-            }
-        }
-
-        return orderSpecifiers.toArray(new OrderSpecifier[0]);
+        return new PageImpl<>(musicSearchList, pageable, total);
     }
 
     @Override
     public Page<MusicianSearchQueryDTO> getMusicianSearchPageByKeywordAndConditions(String keyword, SearchCondition condition, Pageable pageable) {
-        return null;
+        List<MusicianSearchQueryDTO> musicianSearchList;
+        JPAQuery<MusicianSearchQueryDTO> musicianSearchQuery = queryFactory
+                .select(new QMusicianSearchQueryDTO(
+                        musician.id,
+                        musician.nickname,
+                        musician.likeCount,
+                        musician.imageUrl
+                ))
+                .from(musician)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSICIAN));
+
+        if (condition.equals(SearchCondition.ACCURACY)) {
+            musicianSearchList = musicianSearchQuery.fetch();
+            ListSorter<MusicianSearchQueryDTO> listSorter = (key, list) -> list.stream()
+                    .sorted(Comparator.comparing(MusicianSearchQueryDTO::name, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
+                    .skip(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .collect(Collectors.toList());
+            musicianSearchList = listSorter.sort(keyword, musicianSearchList);
+        } else {
+            musicianSearchList = musicianSearchQuery
+                    .orderBy(createMusicianOrderSpecifierByCondition(condition))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        }
+
+        Long total = queryFactory
+                .select(musician.count())
+                .from(musician)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSICIAN))
+                .fetchOne();
+
+        return new PageImpl<>(musicianSearchList, pageable, total);
     }
 
     @Override
     public Page<PlaylistSearchQueryDTO> getPlaylistSearchPageByKeywordAndConditions(String keyword, SearchCondition condition, Pageable pageable) {
-        return null;
+        List<PlaylistSearchQueryDTO> playListSearchList;
+        JPAQuery<PlaylistSearchQueryDTO> playListSearchQuery = queryFactory
+                .select(new QPlaylistSearchQueryDTO(
+                        userPlaylist.id,
+                        userPlaylist.name,
+                        userPlaylist.likeCount
+                ))
+                .from(userPlaylist)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.PLAYLIST));
+
+        if (condition.equals(SearchCondition.ACCURACY)) {
+            playListSearchList = playListSearchQuery.fetch();
+            ListSorter<PlaylistSearchQueryDTO> listSorter = (key, list) -> list.stream()
+                    .sorted(Comparator.comparing(PlaylistSearchQueryDTO::name, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
+                    .skip(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .collect(Collectors.toList());
+            playListSearchList = listSorter.sort(keyword, playListSearchList);
+        } else {
+            playListSearchList = playListSearchQuery
+                    .orderBy(createPlayListOrderSpecifierByCondition(condition))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        }
+
+        Long total = queryFactory
+                .select(userPlaylist.count())
+                .from(userPlaylist)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.PLAYLIST))
+                .fetchOne();
+
+        return new PageImpl<>(playListSearchList, pageable, total);
     }
 
     private BooleanExpression keywordContainsBySearchCategory(String keyword, SearchCategory category) {
@@ -167,6 +233,48 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
         }
 
         return expression;
+    }
+
+    private OrderSpecifier<?>[] createMusicOrderSpecifierByCondition(SearchCondition condition) {
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        switch (condition) {
+            case LATEST -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, music.createdAt));
+            case ASCEND -> orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, music.name));
+            case POPULARITY -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, music.likeCount));
+            default -> {
+                return null;
+            }
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[0]);
+    }
+
+    private OrderSpecifier<?>[] createMusicianOrderSpecifierByCondition(SearchCondition condition) {
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        switch (condition) {
+            case LATEST -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, musician.createdAt));
+            case ASCEND -> orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, musician.nickname));
+            case POPULARITY -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, musician.likeCount));
+            default -> {
+                return null;
+            }
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[0]);
+    }
+
+    private OrderSpecifier<?>[] createPlayListOrderSpecifierByCondition(SearchCondition condition) {
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        switch (condition) {
+            case LATEST -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, userPlaylist.createdAt));
+            case ASCEND -> orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, userPlaylist.name));
+            case POPULARITY -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, userPlaylist.likeCount));
+            default -> {
+                return null;
+            }
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[0]);
     }
 
     private BooleanExpression musicRankingGt(Integer cursorRank) {
