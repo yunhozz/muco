@@ -3,12 +3,12 @@ package com.muco.musicservice.global.dto.response.query;
 import com.muco.musicservice.global.dto.response.SearchResponseDTO;
 import com.querydsl.core.annotations.QueryProjection;
 
-public record MusicSimpleQueryDTO(
+public record MusicianSimpleQueryDTO(
         Long id,
-        String musicName,
-        String musicianName,
-        int likeCount
+        String nickname,
+        int likeCount,
+        String imageUrl
 ) implements SearchResponseDTO {
     @QueryProjection
-    public MusicSimpleQueryDTO {}
+    public MusicianSimpleQueryDTO {}
 }

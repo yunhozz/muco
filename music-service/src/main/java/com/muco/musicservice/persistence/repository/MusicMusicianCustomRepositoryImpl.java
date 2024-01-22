@@ -4,18 +4,23 @@ import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicSearchQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicianSearchQueryDTO;
+import com.muco.musicservice.global.dto.response.query.MusicianSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.PlaylistSearchQueryDTO;
+import com.muco.musicservice.global.dto.response.query.PlaylistSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicSearchQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QMusicianSearchQueryDTO;
+import com.muco.musicservice.global.dto.response.query.QMusicianSimpleQueryDTO;
 import com.muco.musicservice.global.dto.response.query.QPlaylistSearchQueryDTO;
+import com.muco.musicservice.global.dto.response.query.QPlaylistSimpleQueryDTO;
 import com.muco.musicservice.global.enums.SearchCategory;
 import com.muco.musicservice.global.enums.SearchCondition;
 import com.muco.musicservice.global.util.ListSorter;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -74,8 +79,8 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
     }
 
     @Override
-    public List<MusicSimpleQueryDTO> getMusicSimpleListByKeywordAndCategory(String keyword, SearchCategory category) {
-        List<MusicSimpleQueryDTO> musicList = queryFactory
+    public List<MusicSimpleQueryDTO> getMusicSimpleListByKeyword(String keyword) {
+        return queryFactory
                 .select(new QMusicSimpleQueryDTO(
                         music.id,
                         music.name,
@@ -85,17 +90,41 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                 .from(musicMusician)
                 .join(musicMusician.music, music)
                 .join(musicMusician.musician, musician)
-                .where(keywordContainsBySearchCategory(keyword, category))
-                .orderBy(music.id.desc())
-                .fetch();
-
-        ListSorter<MusicSimpleQueryDTO> listSorter = (key, list) -> list.stream()
-                .sorted(Comparator.comparing(MusicSimpleQueryDTO::musicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false))
-                        .thenComparing(MusicSimpleQueryDTO::musicianName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2 ,key, false)))
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSIC))
+                .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc()) // mysql에서 NumberExpression.random().asc() 동작 x
                 .limit(10)
-                .collect(Collectors.toList());
+                .fetch();
+    }
 
-        return listSorter.sort(keyword, musicList);
+    @Override
+    public List<MusicianSimpleQueryDTO> getMusicianSimpleListByKeyword(String keyword) {
+        return queryFactory
+                .select(new QMusicianSimpleQueryDTO(
+                        musician.id,
+                        musician.nickname,
+                        musician.likeCount,
+                        musician.imageUrl
+                ))
+                .from(musician)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.MUSICIAN))
+                .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc()) // mysql에서 NumberExpression.random().asc() 동작 x
+                .limit(10)
+                .fetch();
+    }
+
+    @Override
+    public List<PlaylistSimpleQueryDTO> getPlaylistSimpleListByKeyword(String keyword) {
+        return queryFactory
+                .select(new QPlaylistSimpleQueryDTO(
+                        userPlaylist.id,
+                        userPlaylist.name,
+                        userPlaylist.likeCount
+                ))
+                .from(userPlaylist)
+                .where(keywordContainsBySearchCategory(keyword, SearchCategory.PLAYLIST))
+                .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc()) // mysql에서 NumberExpression.random().asc() 동작 x
+                .limit(10)
+                .fetch();
     }
 
     @Override
