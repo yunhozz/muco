@@ -1,5 +1,6 @@
 package com.muco.musicservice.global.dto.response.query;
 
+import com.muco.musicservice.global.dto.response.SearchResponseDTO;
 import com.querydsl.core.annotations.QueryProjection;
 
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public record MusicSearchQueryDTO(
         int playCount,
         int likeCount,
         LocalDateTime createdAt
-) {
+) implements SearchResponseDTO {
     @QueryProjection
     public MusicSearchQueryDTO {}
 }

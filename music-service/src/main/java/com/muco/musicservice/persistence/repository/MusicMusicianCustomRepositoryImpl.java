@@ -148,12 +148,12 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
 
         if (condition.equals(SearchCondition.ACCURACY)) {
             musicSearchList = musicSearchQuery.fetch();
-            ListSorter<MusicSearchQueryDTO> listSorter = (key, list) -> list.stream()
+            ListSorter<MusicSearchQueryDTO> musicSorter = (key, list) -> list.stream()
                     .sorted(Comparator.comparing(MusicSearchQueryDTO::musicName, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
                     .skip(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .collect(Collectors.toList());
-            musicSearchList = listSorter.sort(keyword, musicSearchList);
+            musicSearchList = musicSorter.sort(keyword, musicSearchList);
         } else {
             musicSearchList = musicSearchQuery
                     .orderBy(createMusicOrderSpecifierByCondition(condition))
@@ -187,12 +187,12 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
 
         if (condition.equals(SearchCondition.ACCURACY)) {
             musicianSearchList = musicianSearchQuery.fetch();
-            ListSorter<MusicianSearchQueryDTO> listSorter = (key, list) -> list.stream()
+            ListSorter<MusicianSearchQueryDTO> musicianSorter = (key, list) -> list.stream()
                     .sorted(Comparator.comparing(MusicianSearchQueryDTO::name, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
                     .skip(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .collect(Collectors.toList());
-            musicianSearchList = listSorter.sort(keyword, musicianSearchList);
+            musicianSearchList = musicianSorter.sort(keyword, musicianSearchList);
         } else {
             musicianSearchList = musicianSearchQuery
                     .orderBy(createMusicianOrderSpecifierByCondition(condition))
@@ -224,12 +224,12 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
 
         if (condition.equals(SearchCondition.ACCURACY)) {
             playListSearchList = playListSearchQuery.fetch();
-            ListSorter<PlaylistSearchQueryDTO> listSorter = (key, list) -> list.stream()
+            ListSorter<PlaylistSearchQueryDTO> playlistSorter = (key, list) -> list.stream()
                     .sorted(Comparator.comparing(PlaylistSearchQueryDTO::name, (n1, n2) -> ListSorter.compareByNumberOfKeywords(n1, n2, key, false)))
                     .skip(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .collect(Collectors.toList());
-            playListSearchList = listSorter.sort(keyword, playListSearchList);
+            playListSearchList = playlistSorter.sort(keyword, playListSearchList);
         } else {
             playListSearchList = playListSearchQuery
                     .orderBy(createPlayListOrderSpecifierByCondition(condition))
