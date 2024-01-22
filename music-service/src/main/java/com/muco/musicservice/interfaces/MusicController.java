@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/api/music")
+@RequestMapping("/api/music/manage")
 @RequiredArgsConstructor
 public class MusicController {
 

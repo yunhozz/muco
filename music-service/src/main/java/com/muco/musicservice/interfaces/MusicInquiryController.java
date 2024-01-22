@@ -74,6 +74,7 @@ public class MusicInquiryController {
      * 카테고리 별 키워드 조건 검색
      */
     @PostMapping("/{category}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseDTO getSearchResultsByKeywordAndCategory(
             @PathVariable String category,
             @Valid @RequestBody SearchRequestDTO dto,
