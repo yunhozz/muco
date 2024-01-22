@@ -1,6 +1,6 @@
 package com.muco.musicservice.interfaces;
 
-import com.muco.musicservice.application.MusicInquiryService;
+import com.muco.musicservice.application.MusicSearchService;
 import com.muco.musicservice.global.dto.request.SearchRequestDTO;
 import com.muco.musicservice.global.dto.response.SearchResponseDTO;
 import com.muco.musicservice.global.dto.response.SearchResultResponseDTO;
@@ -29,9 +29,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/music/search")
 @RequiredArgsConstructor
-public class MusicInquiryController {
+public class MusicSearchController {
 
-    private final MusicInquiryService musicInquiryService;
+    private final MusicSearchService musicSearchService;
 
     /**
      * 키워드 검색
@@ -46,22 +46,22 @@ public class MusicInquiryController {
         SearchCategory searchCategory = SearchCategory.of(category);
         switch (searchCategory) {
             case TOTAL -> {
-                List<SearchResultResponseDTO> results = musicInquiryService.getSearchResultsByKeywordAndCategories(keyword);
+                List<SearchResultResponseDTO> results = musicSearchService.getSearchResultsByKeywordAndCategories(keyword);
                 return ResponseDTO.of("키워드 통합검색 결과입니다.", results, List.class);
             }
             case MUSIC -> {
                 SearchRequestDTO searchRequestDTO = new SearchRequestDTO(keyword, SearchCategory.MUSIC, SearchCondition.LATEST);
-                Page<? extends SearchResponseDTO> results = musicInquiryService.getSearchPageByCategoryAndCondition(searchRequestDTO, pageable);
+                Page<? extends SearchResponseDTO> results = musicSearchService.getSearchPageByCategoryAndCondition(searchRequestDTO, pageable);
                 return ResponseDTO.of("검색 조건에 따른 음원 키워드 조회 결과입니다.", results, Page.class);
             }
             case MUSICIAN -> {
                 SearchRequestDTO searchRequestDTO = new SearchRequestDTO(keyword, SearchCategory.MUSICIAN, SearchCondition.LATEST);
-                Page<? extends SearchResponseDTO> results = musicInquiryService.getSearchPageByCategoryAndCondition(searchRequestDTO, pageable);
+                Page<? extends SearchResponseDTO> results = musicSearchService.getSearchPageByCategoryAndCondition(searchRequestDTO, pageable);
                 return ResponseDTO.of("검색 조건에 따른 아티스트 키워드 조회 결과입니다.", results, Page.class);
             }
             case PLAYLIST -> {
                 SearchRequestDTO searchRequestDTO = new SearchRequestDTO(keyword, SearchCategory.PLAYLIST, SearchCondition.LATEST);
-                Page<? extends SearchResponseDTO> results = musicInquiryService.getSearchPageByCategoryAndCondition(searchRequestDTO, pageable);
+                Page<? extends SearchResponseDTO> results = musicSearchService.getSearchPageByCategoryAndCondition(searchRequestDTO, pageable);
                 return ResponseDTO.of("검색 조건에 따른 재생목록 키워드 조회 결과입니다.", results, Page.class);
             }
             default -> {
@@ -81,14 +81,14 @@ public class MusicInquiryController {
             @PageableDefault(size = 30) Pageable pageable
     ) {
         SearchCategory searchCategory = SearchCategory.of(category);
-        Page<? extends SearchResponseDTO> results = musicInquiryService.getSearchPageByCategoryAndCondition(dto, pageable);
+        Page<? extends SearchResponseDTO> results = musicSearchService.getSearchPageByCategoryAndCondition(dto, pageable);
         return ResponseDTO.of("키워드 검색 결과입니다.", results, Page.class);
     }
 
     @PostMapping("/chart")
     @ResponseStatus(HttpStatus.OK)
     public ResponseDTO getMusicChart(@RequestParam(required = false) Integer cursorRank, @PageableDefault(size = 20) Pageable pageable) {
-        Slice<MusicChartQueryDTO> data = musicInquiryService.getMusicChartList(cursorRank, pageable);
+        Slice<MusicChartQueryDTO> data = musicSearchService.getMusicChartList(cursorRank, pageable);
         return ResponseDTO.of("음악 차트 조회 결과입니다.", data, Slice.class);
     }
 }

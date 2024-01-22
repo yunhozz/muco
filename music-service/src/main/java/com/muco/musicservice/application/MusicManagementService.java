@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class MusicService {
+public class MusicManagementService {
 
     private final MusicRepository musicRepository;
     private final MusicianRepository musicianRepository;

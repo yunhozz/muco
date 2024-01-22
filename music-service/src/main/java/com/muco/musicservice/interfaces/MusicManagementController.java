@@ -3,7 +3,7 @@ package com.muco.musicservice.interfaces;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.muco.musicservice.application.MusicService;
+import com.muco.musicservice.application.MusicManagementService;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
 import com.muco.musicservice.interfaces.dto.CreateMusicSimpleRequestDTO;
 import com.muco.musicservice.interfaces.dto.ResponseDTO;
@@ -23,9 +23,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RestController
 @RequestMapping("/api/music/manage")
 @RequiredArgsConstructor
-public class MusicController {
+public class MusicManagementController {
 
-    private final MusicService musicService;
+    private final MusicManagementService musicManagementService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,7 +52,7 @@ public class MusicController {
                 .musicImageUrl(dto.imageUrl())
                 .build();
 
-        Long musicId = musicService.registerMusic(createMusicRequestDTO);
+        Long musicId = musicManagementService.registerMusic(createMusicRequestDTO);
 
         return ResponseDTO.of("음악을 성공적으로 등록하였습니다.", musicId, Long.class);
     }

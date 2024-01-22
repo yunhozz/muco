@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class MusicInquiryService {
+public class MusicSearchService {
 
     private final MusicMusicianRepository musicMusicianRepository;
 
