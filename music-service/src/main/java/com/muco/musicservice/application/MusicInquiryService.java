@@ -31,25 +31,18 @@ public class MusicInquiryService {
     @Transactional(readOnly = true)
     public List<SearchResultResponseDTO> getSearchResultsByKeywordAndCategories(String keyword) {
         return new ArrayList<>() {{
-            for (SearchCategory category : SearchCategory.values()) {
-                switch (category) {
-                    case MUSIC ->
-                        add(new SearchResultResponseDTO(
-                                SearchCategory.MUSIC,
-                                musicMusicianRepository.getMusicSimpleListByKeyword(keyword)
-                        ));
-                    case MUSICIAN ->
-                        add(new SearchResultResponseDTO(
-                                SearchCategory.MUSICIAN,
-                                musicMusicianRepository.getMusicianSimpleListByKeyword(keyword)
-                        ));
-                    case PLAYLIST ->
-                        add(new SearchResultResponseDTO(
-                                SearchCategory.PLAYLIST,
-                                musicMusicianRepository.getPlaylistSimpleListByKeyword(keyword)
-                        ));
-                }
-            }
+            add(new SearchResultResponseDTO(
+                    SearchCategory.MUSIC,
+                    musicMusicianRepository.getMusicSimpleListByKeyword(keyword)
+            ));
+            add(new SearchResultResponseDTO(
+                    SearchCategory.MUSICIAN,
+                    musicMusicianRepository.getMusicianSimpleListByKeyword(keyword)
+            ));
+            add(new SearchResultResponseDTO(
+                    SearchCategory.PLAYLIST,
+                    musicMusicianRepository.getPlaylistSimpleListByKeyword(keyword)
+            ));
         }};
     }
 
