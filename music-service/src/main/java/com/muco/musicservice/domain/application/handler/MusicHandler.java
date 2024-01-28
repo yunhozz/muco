@@ -5,6 +5,7 @@ import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -15,10 +16,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-public abstract class MusicHandler implements FileHandler<Music, CreateMusicRequestDTO> {
+@Component
+public class MusicHandler implements FileHandler<Music, CreateMusicRequestDTO> {
 
-    private String fileUrl;
-    protected String contentType;
+    private String fileUrl = null;
 
     @Override
     public Music upload(MultipartFile file, CreateMusicRequestDTO dto) {
@@ -39,27 +40,24 @@ public abstract class MusicHandler implements FileHandler<Music, CreateMusicRequ
     }
 
     @Override
-    public Resource download(String fileName) {
-        Path path = Paths.get(fileUrl + "/" + fileName);
-        try(InputStream inputStream = Files.newInputStream(path)) {
-            contentType = Files.probeContentType(path);
-            return new InputStreamResource(inputStream);
-
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getLocalizedMessage());
-        }
+    public Resource download(String fileName) throws IOException {
+        Path path = getPath(fileName);
+        InputStream inputStream = Files.newInputStream(path);
+        return new InputStreamResource(inputStream);
     }
 
     @Override
     public Resource display(String fileName) {
-        Path path = Paths.get(fileUrl + "/" + fileName);
-        try {
-            Resource resource = new FileSystemResource(path);
-            contentType = Files.probeContentType(path);
-            return resource;
+        Path path = getPath(fileName);
+        return new FileSystemResource(path);
+    }
 
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getLocalizedMessage());
-        }
+    public String createContentType(String fileName) throws IOException {
+        Path path = getPath(fileName);
+        return Files.probeContentType(path);
+    }
+
+    private Path getPath(String name) {
+        return Paths.get(fileUrl + "/" + name);
     }
 }

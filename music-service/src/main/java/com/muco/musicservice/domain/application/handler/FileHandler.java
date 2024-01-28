@@ -4,12 +4,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public interface FileHandler<E, T> {
     E upload(MultipartFile file, T in);
-    Resource download(String fileName);
+    Resource download(String fileName) throws IOException;
     Resource display(String fileName);
 
     default String createSavedPath() {

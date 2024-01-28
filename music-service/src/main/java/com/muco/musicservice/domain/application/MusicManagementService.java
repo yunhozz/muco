@@ -15,17 +15,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor
-public class MusicManagementService extends MusicHandler {
+public class MusicManagementService {
 
     private final MusicRepository musicRepository;
     private final MusicianRepository musicianRepository;
     private final MusicMusicianRepository musicMusicianRepository;
 
+    private final MusicHandler musicHandler;
+
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto, MultipartFile file) {
-        Music music = upload(file, dto);
+        Music music = musicHandler.upload(file, dto);
         Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
         MusicMusician musicMusician = new MusicMusician(music, musician);
 
@@ -40,8 +44,15 @@ public class MusicManagementService extends MusicHandler {
     public FileResponseDTO downloadMusic(Long musicId) {
         Music music = findMusicById(musicId);
         String savedName = music.getSavedName();
-        Resource resource = download(savedName);
-        return new FileResponseDTO(resource, contentType, savedName);
+
+        try {
+            Resource resource = musicHandler.download(savedName);
+            String contentType = musicHandler.createContentType(savedName);
+            return new FileResponseDTO(resource, contentType, savedName);
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getLocalizedMessage());
+        }
     }
 
     private Music findMusicById(Long id) {
