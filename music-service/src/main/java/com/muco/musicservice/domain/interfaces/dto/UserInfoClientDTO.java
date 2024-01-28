@@ -1,4 +1,4 @@
-package com.muco.musicservice.interfaces.dto;
+package com.muco.musicservice.domain.interfaces.dto;
 
 public record UserInfoClientDTO(
         String id,

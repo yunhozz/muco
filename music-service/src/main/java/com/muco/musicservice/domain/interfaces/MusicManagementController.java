@@ -1,13 +1,13 @@
-package com.muco.musicservice.interfaces;
+package com.muco.musicservice.domain.interfaces;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.muco.musicservice.application.MusicManagementService;
+import com.muco.musicservice.domain.application.MusicManagementService;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
-import com.muco.musicservice.interfaces.dto.CreateMusicSimpleRequestDTO;
-import com.muco.musicservice.interfaces.dto.ResponseDTO;
-import com.muco.musicservice.interfaces.dto.UserInfoClientDTO;
+import com.muco.musicservice.domain.interfaces.dto.CreateMusicSimpleRequestDTO;
+import com.muco.musicservice.domain.interfaces.dto.ResponseDTO;
+import com.muco.musicservice.domain.interfaces.dto.UserInfoClientDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

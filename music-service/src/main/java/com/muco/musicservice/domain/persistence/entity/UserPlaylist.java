@@ -1,4 +1,4 @@
-package com.muco.musicservice.persistence.entity;
+package com.muco.musicservice.domain.persistence.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,20 +13,18 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MusicMusician extends BaseEntity {
+public class UserPlaylist extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long userId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Music music;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Musician musician;
+    private String name;
 
-    public MusicMusician(Music music, Musician musician) {
-        this.music = music;
-        this.musician = musician;
-    }
+    private int likeCount;
 }

@@ -1,13 +1,13 @@
-package com.muco.musicservice.interfaces;
+package com.muco.musicservice.domain.interfaces;
 
-import com.muco.musicservice.application.MusicSearchService;
+import com.muco.musicservice.domain.application.MusicSearchService;
 import com.muco.musicservice.global.dto.request.SearchRequestDTO;
 import com.muco.musicservice.global.dto.response.SearchResponseDTO;
 import com.muco.musicservice.global.dto.response.SearchResultResponseDTO;
 import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.enums.SearchCategory;
 import com.muco.musicservice.global.enums.SearchCondition;
-import com.muco.musicservice.interfaces.dto.ResponseDTO;
+import com.muco.musicservice.domain.interfaces.dto.ResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

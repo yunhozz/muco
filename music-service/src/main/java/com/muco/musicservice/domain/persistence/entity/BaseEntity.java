@@ -1,4 +1,4 @@
-package com.muco.musicservice.persistence.entity;
+package com.muco.musicservice.domain.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

@@ -1,4 +1,4 @@
-package com.muco.musicservice.persistence.repository;
+package com.muco.musicservice.domain.persistence.repository;
 
 import com.muco.musicservice.global.dto.response.query.MusicChartQueryDTO;
 import com.muco.musicservice.global.dto.response.query.MusicSearchQueryDTO;

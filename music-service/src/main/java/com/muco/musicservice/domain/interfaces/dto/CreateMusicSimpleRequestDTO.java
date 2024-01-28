@@ -1,6 +1,6 @@
-package com.muco.musicservice.interfaces.dto;
+package com.muco.musicservice.domain.interfaces.dto;
 
-import com.muco.musicservice.persistence.entity.Genre;
+import com.muco.musicservice.domain.persistence.entity.Genre;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
