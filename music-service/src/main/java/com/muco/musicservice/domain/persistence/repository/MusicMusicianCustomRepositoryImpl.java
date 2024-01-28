@@ -36,10 +36,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.muco.musicservice.persistence.entity.QMusic.music;
-import static com.muco.musicservice.persistence.entity.QMusicMusician.musicMusician;
-import static com.muco.musicservice.persistence.entity.QMusician.musician;
-import static com.muco.musicservice.persistence.entity.QUserPlaylist.userPlaylist;
+import static com.muco.musicservice.domain.persistence.entity.QMusic.music;
+import static com.muco.musicservice.domain.persistence.entity.QMusicMusician.musicMusician;
+import static com.muco.musicservice.domain.persistence.entity.QMusician.musician;
+import static com.muco.musicservice.domain.persistence.entity.QUserPlaylist.userPlaylist;
 
 @Repository
 @RequiredArgsConstructor

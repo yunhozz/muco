@@ -22,6 +22,5 @@ public record CreateMusicRequestDTO(
         String musicName,
         @NotEmpty
         List<Genre> genres,
-        String lyrics,
-        String musicImageUrl
+        String lyrics
 ) {}
