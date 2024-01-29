@@ -29,15 +29,20 @@ public class MusicManagementService {
 
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto, MultipartFile file) {
-        Music music = musicHandler.upload(file, dto);
-        Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
-        MusicMusician musicMusician = new MusicMusician(music, musician);
+        try {
+            Music music = musicHandler.upload(file, dto);
+            Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
+            MusicMusician musicMusician = new MusicMusician(music, musician);
 
-        musicRepository.save(music);
-        musicianRepository.save(musician);
-        musicMusicianRepository.save(musicMusician);
+            musicRepository.save(music);
+            musicianRepository.save(musician);
+            musicMusicianRepository.save(musicMusician);
 
-        return music.getId();
+            return music.getId();
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getLocalizedMessage());
+        }
     }
 
     @Transactional(readOnly = true)

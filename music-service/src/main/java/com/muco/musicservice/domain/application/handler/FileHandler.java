@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public interface FileHandler<E, T> {
-    E upload(MultipartFile file, T in);
+    E upload(MultipartFile file, T in) throws IOException;
     Resource download(String fileName) throws IOException;
     Resource display(String fileName);
 

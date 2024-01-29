@@ -22,7 +22,7 @@ public class MusicHandler implements FileHandler<Music, CreateMusicRequestDTO> {
     private String fileUrl = null;
 
     @Override
-    public Music upload(MultipartFile file, CreateMusicRequestDTO dto) {
+    public Music upload(MultipartFile file, CreateMusicRequestDTO dto) throws IOException {
         fileUrl = createSavedPath();
         String originalName = file.getOriginalFilename();
 
@@ -30,13 +30,9 @@ public class MusicHandler implements FileHandler<Music, CreateMusicRequestDTO> {
         String uuid = UUID.randomUUID().toString();
         String savedName = uuid + extension;
 
-        try {
-            file.transferTo(new File(fileUrl + "/" + savedName));
-            return Music.create(dto.musicName(), dto.genres(), dto.lyrics(), originalName, savedName, fileUrl, null);
+        file.transferTo(new File(fileUrl + "/" + savedName));
 
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getLocalizedMessage());
-        }
+        return Music.create(dto.musicName(), dto.genres(), dto.lyrics(), originalName, savedName, fileUrl, null);
     }
 
     @Override
