@@ -17,19 +17,16 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @Component
-public class MusicHandler implements FileHandler<Music, CreateMusicRequestDTO> {
-
-    private String fileUrl = null;
+public class MusicFileHandler extends FileHandler<Music, CreateMusicRequestDTO> {
 
     @Override
     public Music upload(MultipartFile file, CreateMusicRequestDTO dto) throws IOException {
-        fileUrl = createSavedPath();
         String originalName = file.getOriginalFilename();
-
         String extension = originalName.substring(originalName.lastIndexOf("."));
         String uuid = UUID.randomUUID().toString();
         String savedName = uuid + extension;
 
+        createSavedPath();
         file.transferTo(new File(fileUrl + "/" + savedName));
 
         return Music.create(dto.musicName(), dto.genres(), dto.lyrics(), originalName, savedName, fileUrl, null);

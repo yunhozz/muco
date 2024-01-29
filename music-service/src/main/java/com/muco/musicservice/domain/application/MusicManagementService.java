@@ -1,6 +1,6 @@
 package com.muco.musicservice.domain.application;
 
-import com.muco.musicservice.domain.application.handler.MusicHandler;
+import com.muco.musicservice.domain.application.handler.MusicFileHandler;
 import com.muco.musicservice.domain.persistence.entity.Music;
 import com.muco.musicservice.domain.persistence.entity.MusicMusician;
 import com.muco.musicservice.domain.persistence.entity.Musician;
@@ -25,12 +25,12 @@ public class MusicManagementService {
     private final MusicianRepository musicianRepository;
     private final MusicMusicianRepository musicMusicianRepository;
 
-    private final MusicHandler musicHandler;
+    private final MusicFileHandler fileHandler;
 
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto, MultipartFile file) {
         try {
-            Music music = musicHandler.upload(file, dto);
+            Music music = fileHandler.upload(file, dto);
             Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
             MusicMusician musicMusician = new MusicMusician(music, musician);
 
@@ -51,8 +51,8 @@ public class MusicManagementService {
         String savedName = music.getSavedName();
 
         try {
-            Resource resource = musicHandler.download(savedName);
-            String contentType = musicHandler.createContentType(savedName);
+            Resource resource = fileHandler.download(savedName);
+            String contentType = fileHandler.createContentType(savedName);
             return new FileResponseDTO(resource, contentType, savedName);
 
         } catch (IOException e) {
