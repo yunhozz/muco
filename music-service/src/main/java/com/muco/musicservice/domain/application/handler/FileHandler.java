@@ -17,21 +17,24 @@ public abstract class FileHandler<E extends BaseEntity, T> {
     protected String savedName;
     protected String fileUrl;
 
+    private static final String FILE_URL = "/music-service/src/main/resources/file/";
+
     protected void transferFile(MultipartFile file) throws IOException {
         originalName = file.getOriginalFilename();
         String extension = originalName.substring(originalName.lastIndexOf("."));
         String uuid = UUID.randomUUID().toString();
         savedName = uuid + extension;
 
-        String absolutePath = new File("").getAbsolutePath() + "\\";
+        String absolutePath = new File("").getAbsolutePath();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
         String currentDate = dateFormat.format(new Date());
-        fileUrl = absolutePath + "/" + currentDate;
+        fileUrl = absolutePath + FILE_URL + currentDate;
 
+        new File(fileUrl).mkdirs();
         file.transferTo(new File(fileUrl + "/" + savedName));
     }
 
-    public abstract E upload(MultipartFile file, T in) throws IOException;
+    public abstract E upload(T in) throws IOException;
     public abstract Resource download(String fileName) throws IOException;
     public abstract Resource display(String fileName) throws IOException;
     public abstract String createContentType(String fileName) throws IOException;

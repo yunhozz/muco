@@ -5,7 +5,6 @@ import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,8 +18,8 @@ public final class MusicFileHandler extends FileHandler<Music, CreateMusicReques
     private MusicFileHandler() {}
 
     @Override
-    public Music upload(MultipartFile file, CreateMusicRequestDTO dto) throws IOException {
-        super.transferFile(file);
+    public Music upload(CreateMusicRequestDTO dto) throws IOException {
+        super.transferFile(dto.file());
         return Music.create(
                 dto.musicName(),
                 dto.genres(),

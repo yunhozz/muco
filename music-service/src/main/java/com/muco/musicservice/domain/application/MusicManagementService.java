@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -28,9 +27,9 @@ public class MusicManagementService {
     private final MusicFileHandler fileHandler;
 
     @Transactional
-    public Long registerMusic(CreateMusicRequestDTO dto, MultipartFile file) {
+    public Long registerMusic(CreateMusicRequestDTO dto) {
         try {
-            Music music = fileHandler.upload(file, dto);
+            Music music = fileHandler.upload(dto);
             Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
             MusicMusician musicMusician = new MusicMusician(music, musician);
 

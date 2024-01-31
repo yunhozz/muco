@@ -18,14 +18,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.nio.charset.StandardCharsets;
@@ -37,9 +36,9 @@ public class MusicManagementController {
 
     private final MusicManagementService musicManagementService;
 
-    @PostMapping
+    @PostMapping(consumes = { "multipart/form-data" })
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseDTO createMusic(@Valid @RequestBody CreateMusicSimpleRequestDTO dto, MultipartHttpServletRequest request) throws JsonProcessingException {
+    public ResponseDTO createMusic(@Valid @ModelAttribute CreateMusicSimpleRequestDTO dto) throws JsonProcessingException {
         String userInfoRequestUri = UriComponentsBuilder
                 .fromUriString("http://localhost:8000/api/users/{id}")
                 .build()
@@ -57,11 +56,12 @@ public class MusicManagementController {
                 .age(Integer.parseInt(userInfo.age()))
                 .nickname(userInfo.nickname())
                 .userImageUrl(userInfo.imageUrl())
-                .genres(dto.genres())
+                .genres(null)
                 .lyrics(dto.lyrics())
+                .file(dto.file())
                 .build();
 
-        Long musicId = musicManagementService.registerMusic(createMusicRequestDTO, request.getFile("music"));
+        Long musicId = musicManagementService.registerMusic(createMusicRequestDTO);
 
         return ResponseDTO.of("음악을 성공적으로 등록하였습니다.", musicId, Long.class);
     }
