@@ -15,5 +15,7 @@ public record CreateMusicSimpleRequestDTO(
         int priority,
         String lyrics,
         String imageUrl,
-        MultipartFile file
+        @NotNull
+        MultipartFile music,
+        MultipartFile image
 ) {}

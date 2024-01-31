@@ -52,7 +52,7 @@ public class Music extends BaseEntity {
 
     private String savedName;
 
-    private String fileUrl;
+    private String musicUrl;
 
     private String imageUrl;
 
@@ -60,24 +60,24 @@ public class Music extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Music(String name, List<Genre> genres, String lyrics, String originalName, String savedName, String fileUrl, String imageUrl) {
+    private Music(String name, List<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
         this.name = name;
         this.genres = genres;
         this.lyrics = lyrics;
         this.originalName = originalName;
         this.savedName = savedName;
-        this.fileUrl = fileUrl;
+        this.musicUrl = musicUrl;
         this.imageUrl = imageUrl;
     }
 
-    public static Music create(String name, List<Genre> genres, String lyrics, String originalName, String savedName, String fileUrl, String imageUrl) {
+    public static Music create(String name, List<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
         return Music.builder()
                 .name(name)
                 .genres(genres)
                 .lyrics(lyrics)
                 .originalName(originalName)
                 .savedName(savedName)
-                .fileUrl(fileUrl)
+                .musicUrl(musicUrl)
                 .imageUrl(imageUrl)
                 .build();
     }

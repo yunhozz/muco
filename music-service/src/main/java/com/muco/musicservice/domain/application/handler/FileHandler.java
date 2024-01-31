@@ -15,28 +15,37 @@ public abstract class FileHandler<E extends BaseEntity, T> {
 
     protected String originalName;
     protected String savedName;
-    protected String fileUrl;
+    protected String[] fileUrls;
 
     private static final String FILE_URL = "/music-service/src/main/resources/file/";
 
-    protected void transferFile(MultipartFile file) throws IOException {
-        originalName = file.getOriginalFilename();
-        String extension = originalName.substring(originalName.lastIndexOf("."));
-        String uuid = UUID.randomUUID().toString();
-        savedName = uuid + extension;
-
+    protected void transferFiles(MultipartFile[] files) throws IOException {
         String absolutePath = new File("").getAbsolutePath();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
         String currentDate = dateFormat.format(new Date());
-        fileUrl = absolutePath + FILE_URL + currentDate;
+        fileUrls = new String[files.length];
 
-        new File(fileUrl).mkdirs();
-        file.transferTo(new File(fileUrl + "/" + savedName));
+        for (int i = 0; i < files.length; i++) {
+            MultipartFile file = files[i];
+            if (file != null) {
+                originalName = file.getOriginalFilename();
+                String extension = originalName.substring(originalName.lastIndexOf("."));
+                String uuid = UUID.randomUUID().toString();
+                savedName = uuid + extension;
+
+                fileUrls[i] = currentDate + "/" + savedName;
+                File f = new File(absolutePath + FILE_URL + fileUrls[i]);
+                if (!f.exists())
+                    f.mkdirs();
+
+                file.transferTo(f);
+            }
+        }
     }
 
     public abstract E upload(T in) throws IOException;
     public abstract Resource download(String fileName) throws IOException;
     public abstract Resource display(String fileName) throws IOException;
     public abstract String createContentType(String fileName) throws IOException;
-    protected abstract Path getPath(String name);
+    protected abstract Path getPath(String fileName);
 }

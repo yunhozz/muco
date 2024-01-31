@@ -24,5 +24,6 @@ public record CreateMusicRequestDTO(
         @NotEmpty
         List<Genre> genres,
         String lyrics,
-        MultipartFile file
+        MultipartFile music,
+        MultipartFile image
 ) {}

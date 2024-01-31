@@ -58,7 +58,8 @@ public class MusicManagementController {
                 .userImageUrl(userInfo.imageUrl())
                 .genres(null)
                 .lyrics(dto.lyrics())
-                .file(dto.file())
+                .music(dto.music())
+                .image(dto.image())
                 .build();
 
         Long musicId = musicManagementService.registerMusic(createMusicRequestDTO);
