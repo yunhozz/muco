@@ -16,7 +16,6 @@ public record CreateMusicSimpleRequestDTO(
         @NotEmpty
         Set<Genre> genres,
         String lyrics,
-        String imageUrl,
         @NotNull
         MultipartFile music,
         MultipartFile image
