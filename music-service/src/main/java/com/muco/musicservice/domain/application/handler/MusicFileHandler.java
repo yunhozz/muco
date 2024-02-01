@@ -14,29 +14,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-public final class MusicFileHandler {
-
-    private FileHandler fileHandler;
+public final class MusicFileHandler extends FileHandler<Music, CreateMusicRequestDTO> {
 
     private MusicFileHandler() {}
 
-    public MusicFileHandler(FileHandler fileHandler) {
-        this.fileHandler = fileHandler;
-    }
-
+    @Override
     public Music upload(CreateMusicRequestDTO dto) throws IOException {
-        fileHandler.transferFiles(new MultipartFile[] {dto.music(), dto.image()});
+        super.transferFiles(new MultipartFile[] { dto.music(), dto.image() });
         return Music.create(
                 dto.musicName(),
                 dto.genres(),
                 dto.lyrics(),
-                fileHandler.getOriginalName(),
-                fileHandler.getSavedName(),
-                fileHandler.getFileUrls()[0],
-                fileHandler.getFileUrls()[1]
+                originalName,
+                savedName,
+                fileUrls[0],
+                fileUrls[1]
         );
     }
 
+    @Override
     public Resource download(String fileName) throws IOException {
         Path path = getPath(fileName);
         InputStream inputStream = Files.newInputStream(path);
@@ -44,17 +40,19 @@ public final class MusicFileHandler {
     }
 
     //TODO
+    @Override
     public Resource display(String fileName) throws IOException {
         return null;
     }
 
+    @Override
     public String createContentType(String fileName) throws IOException {
         Path path = getPath(fileName);
         return Files.probeContentType(path);
     }
 
-    private Path getPath(String fileName) {
-        String fileUrl = fileHandler.getFileUrls()[0];
-        return Paths.get(fileUrl + "/" + fileName);
+    @Override
+    protected Path getPath(String fileName) {
+        return Paths.get(fileUrls[0] + "/" + fileName);
     }
 }

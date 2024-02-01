@@ -1,26 +1,25 @@
 package com.muco.musicservice.domain.application.handler;
 
-import lombok.Getter;
+import com.muco.musicservice.domain.persistence.entity.BaseEntity;
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-@Getter
-public final class FileHandler {
+public abstract class FileHandler<E extends BaseEntity, T> {
 
-    private String originalName;
-    private String savedName;
-    private String[] fileUrls;
+    protected String originalName;
+    protected String savedName;
+    protected String[] fileUrls;
 
     private static final String FILE_URL = "/music-service/src/main/resources/file/";
 
-    private FileHandler() {}
-
-    public void transferFiles(MultipartFile[] files) throws IOException {
+    protected void transferFiles(MultipartFile[] files) throws IOException {
         String absolutePath = new File("").getAbsolutePath();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
         String currentDate = dateFormat.format(new Date());
@@ -43,4 +42,10 @@ public final class FileHandler {
             }
         }
     }
+
+    public abstract E upload(T in) throws IOException;
+    public abstract Resource download(String fileName) throws IOException;
+    public abstract Resource display(String fileName) throws IOException;
+    public abstract String createContentType(String fileName) throws IOException;
+    protected abstract Path getPath(String fileName);
 }
