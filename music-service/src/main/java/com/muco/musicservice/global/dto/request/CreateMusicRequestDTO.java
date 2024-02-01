@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Set;
 
 @Builder
 public record CreateMusicRequestDTO(
@@ -22,7 +22,7 @@ public record CreateMusicRequestDTO(
         @NotBlank
         String musicName,
         @NotEmpty
-        List<Genre> genres,
+        Set<Genre> genres,
         String lyrics,
         MultipartFile music,
         MultipartFile image

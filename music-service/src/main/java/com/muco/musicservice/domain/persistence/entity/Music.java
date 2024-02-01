@@ -4,6 +4,8 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,8 +19,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -32,9 +34,10 @@ public class Music extends BaseEntity {
 
     private String name;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "genre", joinColumns = @JoinColumn(name = "music_id"))
-    private List<Genre> genres = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.EAGER, targetClass = Genre.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(joinColumns = @JoinColumn(name = "music_id"), name = "music_genre")
+    private Set<Genre> genres = new HashSet<>();
 
     @Column(columnDefinition = "TEXT")
     private String lyrics;
@@ -60,7 +63,7 @@ public class Music extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Music(String name, List<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
+    private Music(String name, Set<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
         this.name = name;
         this.genres = genres;
         this.lyrics = lyrics;
@@ -70,7 +73,7 @@ public class Music extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
-    public static Music create(String name, List<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
+    public static Music create(String name, Set<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
         return Music.builder()
                 .name(name)
                 .genres(genres)

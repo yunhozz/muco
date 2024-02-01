@@ -56,7 +56,7 @@ public class MusicManagementController {
                 .age(Integer.parseInt(userInfo.age()))
                 .nickname(userInfo.nickname())
                 .userImageUrl(userInfo.imageUrl())
-                .genres(null)
+                .genres(dto.genres())
                 .lyrics(dto.lyrics())
                 .music(dto.music())
                 .image(dto.image())
@@ -68,6 +68,7 @@ public class MusicManagementController {
     }
 
     @GetMapping("/{id}/download")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseDTO downloadMusic(@PathVariable String id, HttpServletResponse response) {
         FileResponseDTO fileResponseDTO = musicManagementService.downloadMusic(Long.parseLong(id));
         String contentDisposition = ContentDisposition.builder("attachment")
