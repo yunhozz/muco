@@ -1,5 +1,8 @@
 package com.muco.musicservice.domain.application;
 
+import com.muco.musicservice.domain.application.exception.DownloadFailException;
+import com.muco.musicservice.domain.application.exception.MusicNotFoundException;
+import com.muco.musicservice.domain.application.exception.UploadFailException;
 import com.muco.musicservice.domain.application.handler.MusicFileHandler;
 import com.muco.musicservice.domain.persistence.entity.Music;
 import com.muco.musicservice.domain.persistence.entity.MusicMusician;
@@ -40,7 +43,7 @@ public class MusicManagementService {
             return music.getId();
 
         } catch (IOException e) {
-            throw new IllegalArgumentException(e.getLocalizedMessage());
+            throw new UploadFailException(e.getLocalizedMessage());
         }
     }
 
@@ -55,12 +58,12 @@ public class MusicManagementService {
             return new FileResponseDTO(resource, contentType, savedName);
 
         } catch (IOException e) {
-            throw new IllegalArgumentException(e.getLocalizedMessage());
+            throw new DownloadFailException(e.getLocalizedMessage());
         }
     }
 
     private Music findMusicById(Long id) {
         return musicRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 음원이 존재하지 않습니다. id : " + id));
+                .orElseThrow(() -> new MusicNotFoundException("해당 음원이 존재하지 않습니다. id : " + id));
     }
 }
