@@ -1,25 +1,28 @@
 package com.muco.musicservice.domain.application.handler;
 
-import com.muco.musicservice.domain.persistence.entity.BaseEntity;
+import lombok.Getter;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-public abstract class FileHandler<E extends BaseEntity, T> {
-
-    protected String originalName;
-    protected String savedName;
-    protected String[] fileUrls;
+@Getter
+public abstract class FileHandler {
 
     private static final String FILE_URL = "/music-service/src/main/resources/file/";
 
-    protected void transferFiles(MultipartFile[] files) throws IOException {
+    private String originalName;
+    private String savedName;
+    private String[] fileUrls;
+
+    protected void upload(MultipartFile[] files) throws IOException {
         String absolutePath = new File("").getAbsolutePath();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
         String currentDate = dateFormat.format(new Date());
@@ -43,9 +46,11 @@ public abstract class FileHandler<E extends BaseEntity, T> {
         }
     }
 
-    public abstract E upload(T in) throws IOException;
-    public abstract Resource download(String fileName) throws IOException;
-    public abstract Resource display(String fileName) throws IOException;
-    public abstract String createContentType(String fileName) throws IOException;
-    protected abstract Path getPath(String fileName);
+    protected String createContentType(String fileName) throws IOException {
+        Path path = Paths.get(fileUrls[0] + "/" + fileName);
+        return Files.probeContentType(path);
+    }
+
+    protected abstract Resource download(String fileName) throws IOException;
+    protected abstract Resource display(String fileName) throws IOException;
 }
