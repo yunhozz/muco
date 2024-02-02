@@ -32,7 +32,7 @@ public class MusicManagementService {
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto) {
         try {
-            Music music = fileHandler.upload(dto);
+            Music music = fileHandler.musicUpload(dto);
             Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
             MusicMusician musicMusician = new MusicMusician(music, musician);
 
@@ -53,8 +53,8 @@ public class MusicManagementService {
         String savedName = music.getSavedName();
 
         try {
-            Resource resource = fileHandler.download(savedName);
-            String contentType = fileHandler.createContentType(savedName);
+            Resource resource = fileHandler.musicDownload(savedName);
+            String contentType = fileHandler.createMusicContentType(savedName);
             return new FileResponseDTO(resource, contentType, savedName);
 
         } catch (IOException e) {
