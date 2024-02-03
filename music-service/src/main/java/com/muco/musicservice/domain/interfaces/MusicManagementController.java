@@ -36,7 +36,7 @@ public class MusicManagementController {
 
     private final MusicManagementService musicManagementService;
 
-    @PostMapping(consumes = { "multipart/form-data" })
+    @PostMapping(consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseDTO createMusic(@Valid @ModelAttribute CreateMusicSimpleRequestDTO dto) throws JsonProcessingException {
         String userInfoRequestUri = UriComponentsBuilder
@@ -56,6 +56,7 @@ public class MusicManagementController {
                 .age(Integer.parseInt(userInfo.age()))
                 .nickname(userInfo.nickname())
                 .userImageUrl(userInfo.imageUrl())
+                .musicName(dto.name())
                 .genres(dto.genres())
                 .lyrics(dto.lyrics())
                 .music(dto.music())

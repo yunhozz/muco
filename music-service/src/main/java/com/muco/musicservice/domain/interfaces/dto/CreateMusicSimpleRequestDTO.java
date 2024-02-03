@@ -1,6 +1,5 @@
 package com.muco.musicservice.domain.interfaces.dto;
 
-import com.muco.musicservice.domain.persistence.entity.Genre;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +13,7 @@ public record CreateMusicSimpleRequestDTO(
         @NotBlank
         String name,
         @NotEmpty
-        Set<Genre> genres,
+        Set<String> genres,
         String lyrics,
         @NotNull
         MultipartFile music,

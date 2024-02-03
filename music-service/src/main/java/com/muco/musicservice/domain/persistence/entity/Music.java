@@ -21,6 +21,7 @@ import org.hibernate.annotations.Where;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -73,7 +74,11 @@ public class Music extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
-    public static Music create(String name, Set<Genre> genres, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
+    public static Music create(String name, Set<String> genreStrList, String lyrics, String originalName, String savedName, String musicUrl, String imageUrl) {
+        Set<Genre> genres = genreStrList.stream()
+                .map(Genre::of)
+                .collect(Collectors.toSet());
+
         return Music.builder()
                 .name(name)
                 .genres(genres)
