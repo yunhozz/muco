@@ -33,11 +33,16 @@ public class MusicManagementService {
     public Long registerMusic(CreateMusicRequestDTO dto) {
         try {
             Music music = fileHandler.musicUpload(dto);
-            Musician musician = Musician.create(dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
-            MusicMusician musicMusician = new MusicMusician(music, musician);
-
             musicRepository.save(music);
-            musicianRepository.save(musician);
+
+            Musician musician = musicianRepository.getMusicianWhenExistsByUserId(dto.userId());
+            if (musician == null) {
+                musician = Musician.create(dto.userId(), dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
+                musicianRepository.save(musician);
+            }
+            musician.addMusicCount(1);
+
+            MusicMusician musicMusician = new MusicMusician(music, musician);
             musicMusicianRepository.save(musicMusician);
 
             return music.getId();
