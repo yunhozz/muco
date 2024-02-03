@@ -23,37 +23,33 @@ public abstract class FileHandler {
 
     private String originalName;
     private String savedName;
-    private String[] fileUrls;
-
-    protected void upload(MultipartFile[] files) throws IOException {
-        createFileInfo();
-        fileUrls = new String[files.length];
-        for (int i = 0; i < files.length; i++) {
-            MultipartFile file = files[i];
-            if (file != null) {
-                originalName = file.getOriginalFilename();
-                String extension = originalName.substring(originalName.lastIndexOf("."));
-                String uuid = UUID.randomUUID().toString();
-                savedName = uuid + extension;
-
-                fileUrls[i] = currentDate + "/" + savedName;
-                File f = new File(absolutePath + FILE_URL + fileUrls[i]);
-                if (!f.exists())
-                    f.mkdirs();
-
-                file.transferTo(f);
-            }
-        }
-    }
-
-    protected String createContentType(String fileName) throws IOException {
-        Path path = Paths.get(fileUrls[0] + "/" + fileName);
-        return Files.probeContentType(path);
-    }
+    private String fileUrl;
 
     private static void createFileInfo() {
         absolutePath = new File("").getAbsolutePath();
         currentDate = new SimpleDateFormat("yyMMdd").format(new Date());
+    }
+
+    protected void upload(MultipartFile file) throws IOException {
+        createFileInfo();
+        if (!file.isEmpty()) {
+            originalName = file.getOriginalFilename();
+            String extension = originalName.substring(originalName.lastIndexOf("."));
+            String uuid = UUID.randomUUID().toString();
+            savedName = uuid + extension;
+            fileUrl = currentDate + "/" + savedName;
+
+            File f = new File(absolutePath + FILE_URL + fileUrl);
+            if (!f.exists())
+                f.mkdirs();
+
+            file.transferTo(f);
+        }
+    }
+
+    protected String createContentType(String fileName) throws IOException {
+        Path path = Paths.get(fileUrl + "/" + fileName);
+        return Files.probeContentType(path);
     }
 
     protected abstract Resource download(String fileName) throws IOException;

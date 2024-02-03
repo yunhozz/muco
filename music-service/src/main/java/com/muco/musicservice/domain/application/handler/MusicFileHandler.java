@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,15 +38,25 @@ public class MusicFileHandler {
 
     public Music musicUpload(CreateMusicRequestDTO dto) throws IOException {
         log.info("Music Upload Start : " + dto.musicName());
-        fileHandler.upload(new MultipartFile[] {dto.music(), dto.image()});
+
+        /* music upload */
+        fileHandler.upload(dto.music());
+        String musicOriginalName = fileHandler.getOriginalName();
+        String musicSavedName = fileHandler.getSavedName();
+        String musicUrl = fileHandler.getFileUrl();
+
+        /* image upload */
+        fileHandler.upload(dto.image());
+        String imageUrl = fileHandler.getFileUrl();
+
         return Music.create(
                 dto.musicName(),
                 dto.genres(),
                 dto.lyrics(),
-                fileHandler.getOriginalName(),
-                fileHandler.getSavedName(),
-                fileHandler.getFileUrls()[0],
-                fileHandler.getFileUrls()[1]
+                musicOriginalName,
+                musicSavedName,
+                musicUrl,
+                imageUrl
         );
     }
 
@@ -61,6 +70,6 @@ public class MusicFileHandler {
     }
 
     private Path getPath(String fileName) {
-        return Paths.get(fileHandler.getFileUrls()[0] + "/" + fileName);
+        return Paths.get(fileHandler.getFileUrl() + "/" + fileName);
     }
 }
