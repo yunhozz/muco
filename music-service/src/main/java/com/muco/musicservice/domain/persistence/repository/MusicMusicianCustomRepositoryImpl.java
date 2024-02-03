@@ -58,6 +58,7 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                         musician.nickname,
                         music.ranking,
                         music.likeCount,
+                        music.musicUrl,
                         music.imageUrl
                 ))
                 .from(musicMusician)
@@ -136,9 +137,10 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
                         musician.id,
                         music.name,
                         musician.nickname,
-                        music.imageUrl,
                         music.playCount,
                         music.likeCount,
+                        music.musicUrl,
+                        music.imageUrl,
                         music.createdAt
                 ))
                 .from(musicMusician)

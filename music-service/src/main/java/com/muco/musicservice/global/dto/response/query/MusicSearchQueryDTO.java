@@ -10,9 +10,10 @@ public record MusicSearchQueryDTO(
         Long musicianId,
         String musicName,
         String musicianName,
-        String musicImage,
         int playCount,
         int likeCount,
+        String musicUrl,
+        String imageUrl,
         LocalDateTime createdAt
 ) implements SearchResponseDTO {
     @QueryProjection

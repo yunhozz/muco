@@ -9,6 +9,7 @@ public record MusicChartQueryDTO(
         String musicianName,
         int ranking,
         int likeCount,
+        String musicUrl,
         String imageUrl
 ) {
     @QueryProjection
