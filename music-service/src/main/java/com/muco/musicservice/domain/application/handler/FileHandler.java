@@ -18,16 +18,16 @@ public abstract class FileHandler {
 
     private static final String FILE_URL = "/music-service/src/main/resources/file/";
 
+    private static String absolutePath;
+    private static String currentDate;
+
     private String originalName;
     private String savedName;
     private String[] fileUrls;
 
     protected void upload(MultipartFile[] files) throws IOException {
-        String absolutePath = new File("").getAbsolutePath();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
-        String currentDate = dateFormat.format(new Date());
+        createFileInfo();
         fileUrls = new String[files.length];
-
         for (int i = 0; i < files.length; i++) {
             MultipartFile file = files[i];
             if (file != null) {
@@ -49,6 +49,11 @@ public abstract class FileHandler {
     protected String createContentType(String fileName) throws IOException {
         Path path = Paths.get(fileUrls[0] + "/" + fileName);
         return Files.probeContentType(path);
+    }
+
+    private static void createFileInfo() {
+        absolutePath = new File("").getAbsolutePath();
+        currentDate = new SimpleDateFormat("yyMMdd").format(new Date());
     }
 
     protected abstract Resource download(String fileName) throws IOException;
