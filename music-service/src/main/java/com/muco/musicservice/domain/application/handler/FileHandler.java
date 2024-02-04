@@ -42,7 +42,7 @@ public abstract class FileHandler {
     }
 
     protected String createContentType(String fileUrl) throws IOException {
-        Path path = Paths.get(FILE_DIRECTORY + fileUrl);
+        Path path = getPath(fileUrl);
         return Files.probeContentType(path);
     }
 
