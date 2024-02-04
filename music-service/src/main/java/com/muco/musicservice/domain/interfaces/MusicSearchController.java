@@ -34,7 +34,8 @@ public class MusicSearchController {
     private final MusicSearchService musicSearchService;
 
     /**
-     * 키워드 검색
+     * 음원 키워드 검색
+     * 통합검색 : 각 카테고리 별 랜덤하게 10개 씩 조회
      */
     @GetMapping("/{category}")
     @ResponseStatus(HttpStatus.OK)
@@ -71,7 +72,7 @@ public class MusicSearchController {
     }
 
     /**
-     * 카테고리 별 키워드 조건 검색
+     * 음원 카테고리 별 키워드 조건 검색
      */
     @PostMapping("/{category}")
     @ResponseStatus(HttpStatus.OK)
@@ -85,6 +86,9 @@ public class MusicSearchController {
         return ResponseDTO.of("키워드 검색 결과입니다.", results, Page.class);
     }
 
+    /**
+     * 음원 차트 100 커서 페이징 조회
+     */
     @PostMapping("/chart")
     @ResponseStatus(HttpStatus.OK)
     public ResponseDTO getMusicChart(@RequestParam(required = false) Integer cursorRank, @PageableDefault(size = 20) Pageable pageable) {
