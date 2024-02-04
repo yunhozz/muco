@@ -31,36 +31,37 @@ public class MusicManagementService {
 
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto) {
+        Music music;
         try {
-            Music music = fileHandler.musicUpload(dto);
+            music = fileHandler.musicUpload(dto);
             musicRepository.save(music);
-
-            Musician musician = musicianRepository.getMusicianWhenExistsByUserId(dto.userId());
-            if (musician == null) {
-                musician = Musician.create(dto.userId(), dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
-                musicianRepository.save(musician);
-            }
-            musician.addMusicCount(1);
-
-            MusicMusician musicMusician = new MusicMusician(music, musician);
-            musicMusicianRepository.save(musicMusician);
-
-            return music.getId();
 
         } catch (IOException e) {
             throw new UploadFailException(e.getLocalizedMessage());
         }
+
+        Musician musician = musicianRepository.getMusicianWhenExistsByUserId(dto.userId());
+        if (musician == null) {
+            musician = Musician.create(dto.userId(), dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
+            musicianRepository.save(musician);
+        }
+        musician.addMusicCount(1);
+
+        MusicMusician musicMusician = new MusicMusician(music, musician);
+        musicMusicianRepository.save(musicMusician);
+
+        return music.getId();
     }
 
     @Transactional(readOnly = true)
     public FileResponseDTO downloadMusic(Long musicId) {
         Music music = findMusicById(musicId);
-        String savedName = music.getSavedName();
+        String musicUrl = music.getMusicUrl();
 
         try {
-            Resource resource = fileHandler.musicDownload(savedName);
-            String contentType = fileHandler.createMusicContentType(savedName);
-            return new FileResponseDTO(resource, contentType, savedName);
+            Resource resource = fileHandler.musicDownload(musicUrl);
+            String contentType = fileHandler.createMusicContentType(musicUrl);
+            return new FileResponseDTO(resource, contentType, music.getOriginalName());
 
         } catch (IOException e) {
             throw new DownloadFailException(e.getLocalizedMessage());

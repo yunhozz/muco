@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Slf4j
 @Component
@@ -22,22 +21,22 @@ public class MusicFileHandler {
     public MusicFileHandler() {
         fileHandler = new FileHandler() {
             @Override
-            protected Resource download(String fileName) throws IOException {
-                Path path = getPath(fileName);
+            protected Resource download(String musicUrl) throws IOException {
+                Path path = getPath(musicUrl);
                 InputStream inputStream = Files.newInputStream(path);
                 return new InputStreamResource(inputStream);
             }
 
             //TODO
             @Override
-            protected Resource display(String fileName) throws IOException {
+            protected Resource display(String musicUrl) throws IOException {
                 return null;
             }
         };
     }
 
     public Music musicUpload(CreateMusicRequestDTO dto) throws IOException {
-        log.info("Music Upload Start : " + dto.musicName());
+        log.info("Music Upload : " + dto.musicName());
 
         /* music upload */
         fileHandler.upload(dto.music());
@@ -60,16 +59,13 @@ public class MusicFileHandler {
         );
     }
 
-    public Resource musicDownload(String fileName) throws IOException {
-        log.info("Music Download Start : " + fileName);
-        return fileHandler.download(fileName);
+    public Resource musicDownload(String musicUrl) throws IOException {
+        log.info("Music Download from " + musicUrl);
+        return fileHandler.download(musicUrl);
     }
 
-    public String createMusicContentType(String fileName) throws IOException {
-        return fileHandler.createContentType(fileName);
-    }
-
-    private Path getPath(String fileName) {
-        return Paths.get(fileHandler.getFileUrl() + "/" + fileName);
+    public String createMusicContentType(String musicUrl) throws IOException {
+        log.info("Content Type : " + fileHandler.createContentType(musicUrl));
+        return fileHandler.createContentType(musicUrl);
     }
 }

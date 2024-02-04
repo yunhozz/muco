@@ -9,13 +9,13 @@ import com.muco.musicservice.domain.interfaces.dto.ResponseDTO;
 import com.muco.musicservice.domain.interfaces.dto.UserInfoClientDTO;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
 import com.muco.musicservice.global.dto.response.FileResponseDTO;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -70,15 +71,16 @@ public class MusicManagementController {
 
     @GetMapping("/{id}/download")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseDTO downloadMusic(@PathVariable String id, HttpServletResponse response) {
+    public ResponseEntity<Resource> downloadMusic(@PathVariable String id) {
         FileResponseDTO fileResponseDTO = musicManagementService.downloadMusic(Long.parseLong(id));
-        String contentDisposition = ContentDisposition.builder("attachment")
-                .filename(fileResponseDTO.fileName(), StandardCharsets.UTF_8)
-                .build().toString();
+        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+                .filename(UriUtils.encode(fileResponseDTO.fileName(), StandardCharsets.UTF_8))
+                .build();
 
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
-        response.setHeader(HttpHeaders.CONTENT_TYPE, fileResponseDTO.contentType());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(contentDisposition);
+        headers.setContentType(MediaType.valueOf(fileResponseDTO.contentType()));
 
-        return ResponseDTO.of("해당 음원을 다운로드합니다.", fileResponseDTO.resource(), Resource.class);
+        return new ResponseEntity<>(fileResponseDTO.resource(), headers, HttpStatus.OK);
     }
 }

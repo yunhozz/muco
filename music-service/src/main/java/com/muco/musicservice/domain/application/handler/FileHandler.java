@@ -16,30 +16,24 @@ import java.util.UUID;
 @Getter
 public abstract class FileHandler {
 
-    private static final String FILE_URL = "/music-service/src/main/resources/file/";
-
-    private static String absolutePath;
-    private static String currentDate;
+    private static final String CURRENT_DATE = new SimpleDateFormat("yyMMdd").format(new Date());
+    private static final String ABSOLUTE_PATH = new File("").getAbsolutePath();
+    private static final String ROOT_DIRECTORY = "/music-service/src/main/resources/file/";
+    protected static final String FILE_DIRECTORY = ABSOLUTE_PATH + ROOT_DIRECTORY;
 
     private String originalName;
     private String savedName;
     private String fileUrl;
 
-    private static void createFileInfo() {
-        absolutePath = new File("").getAbsolutePath();
-        currentDate = new SimpleDateFormat("yyMMdd").format(new Date());
-    }
-
     protected void upload(MultipartFile file) throws IOException {
-        createFileInfo();
         if (!file.isEmpty()) {
             originalName = file.getOriginalFilename();
             String extension = originalName.substring(originalName.lastIndexOf("."));
             String uuid = UUID.randomUUID().toString();
             savedName = uuid + extension;
-            fileUrl = currentDate + "/" + savedName;
+            fileUrl = CURRENT_DATE + "/" + savedName;
 
-            File f = new File(absolutePath + FILE_URL + fileUrl);
+            File f = new File(FILE_DIRECTORY + fileUrl);
             if (!f.exists())
                 f.mkdirs();
 
@@ -47,11 +41,15 @@ public abstract class FileHandler {
         }
     }
 
-    protected String createContentType(String fileName) throws IOException {
-        Path path = Paths.get(fileUrl + "/" + fileName);
+    protected String createContentType(String fileUrl) throws IOException {
+        Path path = Paths.get(FILE_DIRECTORY + fileUrl);
         return Files.probeContentType(path);
     }
 
-    protected abstract Resource download(String fileName) throws IOException;
-    protected abstract Resource display(String fileName) throws IOException;
+    protected Path getPath(String fileUrl) {
+        return Paths.get(FILE_DIRECTORY + fileUrl);
+    }
+
+    protected abstract Resource download(String fileUrl) throws IOException;
+    protected abstract Resource display(String fileUrl) throws IOException;
 }
