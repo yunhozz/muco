@@ -3,6 +3,7 @@ package com.muco.musicservice.domain.application;
 import com.muco.musicservice.domain.application.exception.DownloadFailException;
 import com.muco.musicservice.domain.application.exception.MusicNotFoundException;
 import com.muco.musicservice.domain.application.exception.UploadFailException;
+import com.muco.musicservice.domain.application.handler.ImageFileHandler;
 import com.muco.musicservice.domain.application.handler.MusicFileHandler;
 import com.muco.musicservice.domain.persistence.entity.Music;
 import com.muco.musicservice.domain.persistence.entity.MusicMusician;
@@ -27,13 +28,14 @@ public class MusicManagementService {
     private final MusicianRepository musicianRepository;
     private final MusicMusicianRepository musicMusicianRepository;
 
-    private final MusicFileHandler fileHandler;
+    private final MusicFileHandler musicHandler;
+    private final ImageFileHandler imageHandler;
 
     @Transactional
     public Long registerMusic(CreateMusicRequestDTO dto) {
         Music music;
         try {
-            music = fileHandler.musicUpload(dto);
+            music = musicHandler.musicUpload(dto);
             musicRepository.save(music);
 
         } catch (IOException e) {
@@ -59,8 +61,23 @@ public class MusicManagementService {
         String musicUrl = music.getMusicUrl();
 
         try {
-            Resource resource = fileHandler.musicDownload(musicUrl);
-            String contentType = fileHandler.createMusicContentType(musicUrl);
+            Resource resource = musicHandler.musicDownload(musicUrl);
+            String contentType = musicHandler.createMusicContentType(musicUrl);
+            return new FileResponseDTO(resource, contentType, music.getOriginalName());
+
+        } catch (IOException e) {
+            throw new DownloadFailException(e.getLocalizedMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public FileResponseDTO displayMusicImage(Long musicId) {
+        Music music = findMusicById(musicId);
+        String imageUrl = music.getImageUrl();
+
+        try {
+            Resource resource = imageHandler.displayImage(imageUrl);
+            String contentType = imageHandler.createImageContentType(imageUrl);
             return new FileResponseDTO(resource, contentType, music.getOriginalName());
 
         } catch (IOException e) {

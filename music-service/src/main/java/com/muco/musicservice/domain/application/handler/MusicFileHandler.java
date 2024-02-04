@@ -27,10 +27,11 @@ public class MusicFileHandler {
                 return new InputStreamResource(inputStream);
             }
 
-            //TODO
             @Override
             protected Resource display(String musicUrl) throws IOException {
-                return null;
+                Path path = getPath(musicUrl);
+                InputStream inputStream = Files.newInputStream(path);
+                return new InputStreamResource(inputStream);
             }
         };
     }
@@ -65,7 +66,6 @@ public class MusicFileHandler {
     }
 
     public String createMusicContentType(String musicUrl) throws IOException {
-        log.info("Content Type : " + fileHandler.createContentType(musicUrl));
         return fileHandler.createContentType(musicUrl);
     }
 }

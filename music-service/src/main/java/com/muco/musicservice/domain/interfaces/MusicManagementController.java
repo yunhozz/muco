@@ -83,4 +83,14 @@ public class MusicManagementController {
 
         return new ResponseEntity<>(fileResponseDTO.resource(), headers, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/image")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Resource> displayMusicImage(@PathVariable String id) {
+        FileResponseDTO fileResponseDTO = musicManagementService.displayMusicImage(Long.parseLong(id));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(fileResponseDTO.contentType()));
+
+        return new ResponseEntity<>(fileResponseDTO.resource(), headers, HttpStatus.OK);
+    }
 }
