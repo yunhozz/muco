@@ -1,8 +1,8 @@
 package com.muco.authservice.interfaces;
 
 import com.muco.authservice.application.exception.AuthException;
-import com.muco.authservice.global.dto.res.ErrorResponseDTO;
 import com.muco.authservice.global.enums.ErrorCode;
+import com.muco.authservice.interfaces.dto.ErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,9 +44,8 @@ public class AuthExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ErrorResponseDTO> handleHttpClientErrorException(HttpClientErrorException e) {
         log.error(e.getLocalizedMessage());
-        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(ErrorCode.METHOD_NOT_ALLOWED, e.getLocalizedMessage());
         return ResponseEntity
                 .badRequest()
-                .body(errorResponseDTO);
+                .body(e.getResponseBodyAs(ErrorResponseDTO.class));
     }
 }

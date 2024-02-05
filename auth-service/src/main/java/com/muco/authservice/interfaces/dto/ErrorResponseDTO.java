@@ -1,4 +1,4 @@
-package com.muco.authservice.global.dto.res;
+package com.muco.authservice.interfaces.dto;
 
 import com.muco.authservice.global.enums.ErrorCode;
 import lombok.AccessLevel;
