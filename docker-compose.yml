@@ -62,3 +62,16 @@ services:
       - mysql
     networks:
       - muco-network
+
+  music-service:
+    image: muco/music-service:latest
+    container_name: muco-music-service
+    ports:
+      - "8070:8070"
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://muco-eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql
+    networks:
+      - muco-network
