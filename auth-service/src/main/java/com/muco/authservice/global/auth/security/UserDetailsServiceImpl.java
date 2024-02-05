@@ -1,7 +1,7 @@
 package com.muco.authservice.global.auth.security;
 
-import com.muco.authservice.persistence.entity.User;
-import com.muco.authservice.persistence.repo.UserRepository;
+import com.muco.authservice.domain.persistence.entity.User;
+import com.muco.authservice.domain.persistence.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

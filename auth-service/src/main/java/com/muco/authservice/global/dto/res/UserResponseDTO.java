@@ -1,8 +1,8 @@
 package com.muco.authservice.global.dto.res;
 
+import com.muco.authservice.domain.persistence.entity.User;
 import com.muco.authservice.global.enums.LoginType;
 import com.muco.authservice.global.enums.Role;
-import com.muco.authservice.persistence.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
