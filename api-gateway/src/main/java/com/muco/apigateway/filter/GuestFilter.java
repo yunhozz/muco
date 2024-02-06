@@ -32,12 +32,12 @@ public class GuestFilter {
                     }
 
                     log.info("[ACCESS TOKEN IS OK]");
-                    ServerHttpRequest requestHeader = request.mutate()
+                    ServerHttpRequest requestWithUserInfo = request.mutate()
                             .header("username", claims.getSubject())
                             .header("auth", auth)
                             .build();
 
-                    return chain.filter(exchange.mutate().request(request).build());
+                    return chain.filter(exchange.mutate().request(requestWithUserInfo).build());
                 };
             }
         };
