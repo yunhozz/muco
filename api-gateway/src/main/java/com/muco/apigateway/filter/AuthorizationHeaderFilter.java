@@ -10,27 +10,22 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class AuthorizationHeaderFilter {
-
-    private final AbstractGatewayFilterFactoryImpl abstractGatewayFilterFactory;
+public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<AuthorizationHeaderFilter.Config> {
 
     public AuthorizationHeaderFilter() {
-        this.abstractGatewayFilterFactory = new AbstractGatewayFilterFactoryImpl() {
-            @Override
-            public GatewayFilter apply(Config config) {
-                return (exchange, chain) -> {
-                    ServerHttpRequest request = exchange.getRequest();
-                    String headerToken = getHeaderToken(request);
-                    Optional<String> optionalToken = resolveToken(headerToken);
-                    assert optionalToken.isEmpty();
-                    return chain.filter(exchange);
-                };
-            }
-        };
+        super(Config.class);
     }
 
-    public GatewayFilter apply(AbstractGatewayFilterFactoryImpl.Config config) {
-        GatewayFilter filter = abstractGatewayFilterFactory.apply(config);
-        return new OrderedGatewayFilter(filter, -1);
+    @Override
+    public GatewayFilter apply(Config config) {
+        return new OrderedGatewayFilter((exchange, chain) -> {
+            ServerHttpRequest request = exchange.getRequest();
+            String headerToken = getHeaderToken(request);
+            Optional<String> optionalToken = resolveToken(headerToken);
+            assert optionalToken.isEmpty();
+            return chain.filter(exchange);
+        }, -1);
     }
+
+    static class Config {}
 }
