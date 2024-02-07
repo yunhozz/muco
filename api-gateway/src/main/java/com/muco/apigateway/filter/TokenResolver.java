@@ -9,4 +9,5 @@ public interface TokenResolver {
     String getHeaderToken(ServerHttpRequest request);
     Optional<String> resolveToken(String token);
     Claims parseToken(String token);
+    void checkValidToken(String token);
 }

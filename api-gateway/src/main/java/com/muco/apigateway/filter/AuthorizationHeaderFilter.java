@@ -6,8 +6,6 @@ import org.springframework.cloud.gateway.filter.OrderedGatewayFilter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<AuthorizationHeaderFilter.Config> {
@@ -21,8 +19,11 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
         return new OrderedGatewayFilter((exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String headerToken = getHeaderToken(request);
-            Optional<String> optionalToken = resolveToken(headerToken);
-            assert optionalToken.isEmpty();
+            log.info("[Header Token] " + headerToken);
+
+            resolveToken(headerToken)
+                    .ifPresent(this::checkValidToken);
+
             return chain.filter(exchange);
         }, -1);
     }
