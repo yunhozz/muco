@@ -5,6 +5,7 @@ import com.muco.authservice.domain.interfaces.dto.ResponseDTO;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
 import com.muco.authservice.global.dto.req.SignInRequestDTO;
 import com.muco.authservice.global.dto.res.TokenResponseDTO;
+import com.muco.authservice.global.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,6 +45,7 @@ public class AuthController {
                 .fromUriString(referer != null ? referer : "/")
                 .build().toUri();
 
+        CookieUtils.addCookie(response, "user-id", CookieUtils.serialize(data.getId()));
         response.addHeader(HttpHeaders.LOCATION, String.valueOf(prevPage));
         response.addHeader(HttpHeaders.AUTHORIZATION, data.getTokenType() + " " + data.getAccessToken());
 
@@ -60,15 +63,14 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/token/reissue")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseDTO refreshToken(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletResponse response) {
-        if (authService.refreshJwtTokens(userDetails.getUsername()).isPresent()) {
-            TokenResponseDTO data = authService.refreshJwtTokens(userDetails.getUsername()).get();
-            response.addHeader(HttpHeaders.AUTHORIZATION, data.getTokenType() + " " + data.getAccessToken());
-
-            return ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", data, TokenResponseDTO.class);
-
+    @PostMapping("/token/reissue")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDTO reissueToken(@RequestParam String userId, HttpServletResponse response) {
+        Optional<TokenResponseDTO> result = authService.refreshJwtTokens(userId);
+        if (result.isPresent()) {
+            TokenResponseDTO tokenResponseDTO = result.get();
+            response.addHeader(HttpHeaders.AUTHORIZATION, tokenResponseDTO.getTokenType() + " " + tokenResponseDTO.getAccessToken());
+            return ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", tokenResponseDTO, TokenResponseDTO.class);
         } else {
             return ResponseDTO.of("로그인을 다시 진행해주세요.");
         }

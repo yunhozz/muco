@@ -27,10 +27,12 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         log.info("[REQUEST URI] " + requestURI);
 
-        resolveToken(token).ifPresent(accessToken -> {
-            Authentication authentication = jwtProvider.getAuthentication(accessToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        });
+        if (!requestURI.equals("/api/auth/token/reissue")) {
+            resolveToken(token).ifPresent(accessToken -> {
+                Authentication authentication = jwtProvider.getAuthentication(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            });
+        }
 
         filterChain.doFilter(request, response);
     }

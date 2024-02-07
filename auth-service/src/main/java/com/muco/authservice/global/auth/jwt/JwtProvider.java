@@ -45,10 +45,11 @@ public class JwtProvider {
                 .collect(Collectors.joining(","));
 
         claims.put("auth", auth);
-        String accessToken = createToken(claims, "atk", accessTokenValidTime - 3599999L);
+        String accessToken = createToken(claims, "atk", accessTokenValidTime);
         String refreshToken = createToken(claims, "rtk", refreshTokenValidTime);
 
         return TokenResponseDTO.builder()
+                .id(userId)
                 .tokenType(jwtProperties.getTokenType())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
