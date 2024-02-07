@@ -25,13 +25,11 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        log.info("[Request URI] " + requestURI);
+        log.info("[REQUEST URI] " + requestURI);
 
         resolveToken(token).ifPresent(accessToken -> {
-            if (jwtProvider.isValidToken(accessToken)) {
-                Authentication authentication = jwtProvider.getAuthentication(accessToken);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+            Authentication authentication = jwtProvider.getAuthentication(accessToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         });
 
         filterChain.doFilter(request, response);
