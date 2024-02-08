@@ -70,7 +70,7 @@ public class AuthController {
         if (result.isPresent()) {
             TokenResponseDTO tokenResponseDTO = result.get();
             response.addHeader(HttpHeaders.AUTHORIZATION, tokenResponseDTO.getTokenType() + " " + tokenResponseDTO.getAccessToken());
-            return ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", tokenResponseDTO, TokenResponseDTO.class);
+            return ResponseDTO.of("JWT 토큰이 재발행 되었습니다.", tokenResponseDTO.getAccessToken(), String.class);
         } else {
             return ResponseDTO.of("로그인을 다시 진행해주세요.");
         }
@@ -78,17 +78,12 @@ public class AuthController {
 
     @DeleteMapping("/sign-out")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseDTO logout(
-            @AuthenticationPrincipal Authentication authentication,
-            HttpServletRequest request,
-            HttpServletResponse response
+    public void logout(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            HttpServletRequest request, HttpServletResponse response
     ) {
         String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        authService.logout(userDetails.getUsername(), accessToken.split(" ")[1]);
-
+        Authentication authentication = authService.logout(userDetails.getUsername(), accessToken.split(" ")[1]);
         new SecurityContextLogoutHandler().logout(request, response, authentication);
-
-        return ResponseDTO.of("로그아웃에 성공하였습니다.");
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Key;
 import java.util.Date;
@@ -58,6 +59,7 @@ public class JwtProvider {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public Authentication getAuthentication(String token) {
         Claims claims = parseToken(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(claims.getSubject());

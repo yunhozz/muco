@@ -65,11 +65,13 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public void logout(String userId, String token) {
+    public Authentication logout(String userId, String token) {
+        Authentication authentication = jwtProvider.getAuthentication(token);
         RedisUtils.getValue(userId).ifPresent(refreshToken -> {
             RedisUtils.deleteValue(userId);
             RedisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
         });
+        return authentication;
     }
 
     private TokenResponseDTO generateJwtToken(String userId, Set<Role> roles) {
