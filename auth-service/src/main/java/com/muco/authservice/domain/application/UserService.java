@@ -9,10 +9,10 @@ import com.muco.authservice.domain.application.exception.VerifyingCodeNotFoundEx
 import com.muco.authservice.domain.persistence.entity.User;
 import com.muco.authservice.domain.persistence.entity.UserPassword;
 import com.muco.authservice.domain.persistence.entity.UserProfile;
-import com.muco.authservice.domain.persistence.query.UserInfoQueryDTO;
 import com.muco.authservice.domain.persistence.repo.UserPasswordRepository;
 import com.muco.authservice.domain.persistence.repo.UserProfileRepository;
 import com.muco.authservice.domain.persistence.repo.UserRepository;
+import com.muco.authservice.global.dto.query.UserInfoQueryDTO;
 import com.muco.authservice.global.dto.req.SignUpRequestDTO;
 import com.muco.authservice.global.dto.res.SignUpResponseDTO;
 import com.muco.authservice.global.dto.res.UserResponseDTO;

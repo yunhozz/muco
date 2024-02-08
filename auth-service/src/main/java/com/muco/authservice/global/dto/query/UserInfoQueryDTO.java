@@ -1,4 +1,4 @@
-package com.muco.authservice.domain.persistence.query;
+package com.muco.authservice.global.dto.query;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;

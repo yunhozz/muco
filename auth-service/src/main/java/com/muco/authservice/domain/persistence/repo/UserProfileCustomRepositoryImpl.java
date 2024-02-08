@@ -1,7 +1,7 @@
 package com.muco.authservice.domain.persistence.repo;
 
-import com.muco.authservice.domain.persistence.query.QUserInfoQueryDTO;
-import com.muco.authservice.domain.persistence.query.UserInfoQueryDTO;
+import com.muco.authservice.global.dto.query.QUserInfoQueryDTO;
+import com.muco.authservice.global.dto.query.UserInfoQueryDTO;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

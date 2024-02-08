@@ -2,7 +2,7 @@ package com.muco.authservice.domain.interfaces;
 
 import com.muco.authservice.domain.application.UserService;
 import com.muco.authservice.domain.interfaces.dto.ResponseDTO;
-import com.muco.authservice.domain.persistence.query.UserInfoQueryDTO;
+import com.muco.authservice.global.dto.query.UserInfoQueryDTO;
 import com.muco.authservice.global.dto.req.CodeRequestDTO;
 import com.muco.authservice.global.dto.req.SignUpRequestDTO;
 import com.muco.authservice.global.dto.res.SignUpResponseDTO;
