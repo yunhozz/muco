@@ -24,6 +24,8 @@ import java.util.Optional;
 @Component
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<AuthorizationHeaderFilter.Config> {
 
+    private static final String JWT_TOKEN_REFRESH_URL = "http://localhost:8000/api/auth/token/reissue";
+
     public AuthorizationHeaderFilter() {
         super(Config.class);
     }
@@ -44,7 +46,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
                     if (cookie != null) {
                         byte[] decode = Base64.getUrlDecoder().decode(cookie.getValue());
                         String userId = (String) SerializationUtils.deserialize(decode);
-                        URI redirectUri = UriComponentsBuilder.fromUriString("http://localhost:8000/api/auth/token/reissue")
+                        URI redirectUri = UriComponentsBuilder.fromUriString(JWT_TOKEN_REFRESH_URL)
                                 .queryParam("userId", userId)
                                 .build().toUri();
 
