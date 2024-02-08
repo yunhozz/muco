@@ -43,10 +43,8 @@ public class Music extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String lyrics;
 
-    @ColumnDefault("0")
     private int playCount;
 
-    @ColumnDefault("0")
     private int likeCount;
 
     @ColumnDefault("-1")
