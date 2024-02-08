@@ -19,9 +19,7 @@ public class UserFilter extends AbstractGatewayFilterFactoryImpl<UserFilter.Conf
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            String headerToken = getHeaderToken(request);
-            String token = resolveToken(headerToken).get();
-
+            String token = getAccessToken(request).get();
             Claims claims = parseToken(token);
             String auth = (String) claims.get("auth");
 
@@ -31,10 +29,7 @@ public class UserFilter extends AbstractGatewayFilterFactoryImpl<UserFilter.Conf
             }
 
             log.info("[ACCESS TOKEN IS OK]");
-            ServerHttpRequest requestWithUserInfo = request.mutate()
-                    .header("username", claims.getSubject())
-                    .header("auth", auth)
-                    .build();
+            ServerHttpRequest requestWithUserInfo = createRequestWithUserInfo(request, claims);
 
             return chain.filter(exchange.mutate().request(requestWithUserInfo).build());
         };

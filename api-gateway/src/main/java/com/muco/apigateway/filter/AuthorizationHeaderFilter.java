@@ -34,9 +34,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
     public GatewayFilter apply(Config config) {
         return new OrderedGatewayFilter((exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            String headerToken = getHeaderToken(request);
-            Optional<String> optToken = resolveToken(headerToken);
-
+            Optional<String> optToken = getAccessToken(request);
             if (optToken.isPresent()) {
                 String token = optToken.get();
                 try {

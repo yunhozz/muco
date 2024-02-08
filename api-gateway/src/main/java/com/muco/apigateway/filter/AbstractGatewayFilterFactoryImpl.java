@@ -71,6 +71,19 @@ public abstract class AbstractGatewayFilterFactoryImpl<C>
         }
     }
 
+    protected Optional<String> getAccessToken(ServerHttpRequest request) {
+        String headerToken = getHeaderToken(request);
+        return resolveToken(headerToken);
+    }
+
+    protected ServerHttpRequest createRequestWithUserInfo(ServerHttpRequest request, Claims claims) {
+        String auth = (String) claims.get("auth");
+        return request.mutate()
+                .header("username", claims.getSubject())
+                .header("auth", auth)
+                .build();
+    }
+
     private Optional<String> resolveParts(String token) {
         String[] parts = token.split(" ");
         return parts.length == 2 && parts[0].equals("Bearer") ? Optional.ofNullable(parts[1]) : Optional.empty();
