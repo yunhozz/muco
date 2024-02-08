@@ -19,6 +19,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+    private static final String JWT_TOKEN_REFRESH_URI = "/api/auth/token/reissue";
+
     private final JwtProvider jwtProvider;
 
     @Override
@@ -27,7 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         log.info("[REQUEST URI] " + requestURI);
 
-        if (!requestURI.equals("/api/auth/token/reissue")) {
+        if (!requestURI.equals(JWT_TOKEN_REFRESH_URI)) {
             resolveToken(token).ifPresent(accessToken -> {
                 Authentication authentication = jwtProvider.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
