@@ -5,7 +5,6 @@ import com.muco.authservice.domain.interfaces.dto.ResponseDTO;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
 import com.muco.authservice.global.dto.req.SignInRequestDTO;
 import com.muco.authservice.global.dto.res.TokenResponseDTO;
-import com.muco.authservice.global.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -45,7 +44,6 @@ public class AuthController {
                 .fromUriString(referer != null ? referer : "/")
                 .build().toUri();
 
-        CookieUtils.addCookie(response, "user-id", CookieUtils.serialize(data.getId()));
         response.addHeader(HttpHeaders.LOCATION, String.valueOf(prevPage));
         response.addHeader(HttpHeaders.AUTHORIZATION, data.getTokenType() + " " + data.getAccessToken());
 

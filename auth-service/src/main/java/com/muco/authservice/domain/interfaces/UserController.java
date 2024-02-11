@@ -2,6 +2,7 @@ package com.muco.authservice.domain.interfaces;
 
 import com.muco.authservice.domain.application.UserService;
 import com.muco.authservice.domain.interfaces.dto.ResponseDTO;
+import com.muco.authservice.domain.interfaces.handler.KafkaHandler;
 import com.muco.authservice.global.dto.query.UserInfoQueryDTO;
 import com.muco.authservice.global.dto.req.CodeRequestDTO;
 import com.muco.authservice.global.dto.req.SignUpRequestDTO;
@@ -28,10 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-
     private static final String EMAIL_COOKIE_NAME = "username";
     private static final int EMAIL_COOKIE_MAX_AGE = 3600;
+
+    private final UserService userService;
+    private final KafkaHandler kafkaHandler;
 
     @PostMapping("/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
@@ -58,7 +60,7 @@ public class UserController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseDTO getUserInfoById(@PathVariable String id) {
-        UserInfoQueryDTO data = userService.findUserInformationById(Long.parseLong(id));
+        UserInfoQueryDTO data = kafkaHandler.sendUserInfoByUserId(Long.parseLong(id));
         return ResponseDTO.of("사용자 조회에 성공하였습니다.", data, UserInfoQueryDTO.class);
     }
 }
