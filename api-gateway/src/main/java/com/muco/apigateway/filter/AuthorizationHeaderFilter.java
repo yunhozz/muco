@@ -47,12 +47,12 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
                     return chain.filter(exchange.mutate().request(requestWithSubject).build());
 
                 } catch (ExpiredJwtException e) {
-                    HttpCookie cookie = request.getCookies().getFirst("user-id");
+                    HttpCookie cookie = request.getCookies().getFirst("username");
                     if (cookie != null) {
                         byte[] decode = Base64.getUrlDecoder().decode(cookie.getValue());
-                        String userId = (String) SerializationUtils.deserialize(decode);
+                        String username = (String) SerializationUtils.deserialize(decode);
                         URI redirectUri = UriComponentsBuilder.fromUriString(JWT_TOKEN_REFRESH_URL)
-                                .queryParam("userId", userId)
+                                .queryParam("username", username)
                                 .build().toUri();
 
                         WebClient webClient = WebClient.create();

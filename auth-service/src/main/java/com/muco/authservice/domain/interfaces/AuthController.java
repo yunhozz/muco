@@ -5,6 +5,7 @@ import com.muco.authservice.domain.interfaces.dto.ResponseDTO;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
 import com.muco.authservice.global.dto.req.SignInRequestDTO;
 import com.muco.authservice.global.dto.res.TokenResponseDTO;
+import com.muco.authservice.global.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -44,6 +45,7 @@ public class AuthController {
                 .fromUriString(referer != null ? referer : "/")
                 .build().toUri();
 
+        CookieUtils.addCookie(response, "username", CookieUtils.serialize(dto.getEmail()));
         response.addHeader(HttpHeaders.LOCATION, String.valueOf(prevPage));
         response.addHeader(HttpHeaders.AUTHORIZATION, data.getTokenType() + " " + data.getAccessToken());
 
@@ -63,8 +65,8 @@ public class AuthController {
 
     @PostMapping("/token/reissue")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseDTO reissueToken(@RequestParam String userId, HttpServletResponse response) {
-        Optional<TokenResponseDTO> result = authService.refreshJwtTokens(userId);
+    public ResponseDTO reissueToken(@RequestParam String username, HttpServletResponse response) {
+        Optional<TokenResponseDTO> result = authService.refreshJwtTokens(username);
         if (result.isPresent()) {
             TokenResponseDTO tokenResponseDTO = result.get();
             response.addHeader(HttpHeaders.AUTHORIZATION, tokenResponseDTO.getTokenType() + " " + tokenResponseDTO.getAccessToken());
