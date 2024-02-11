@@ -1,8 +1,7 @@
-package com.muco.authservice.domain.interfaces;
+package com.muco.musicservice.domain.interfaces.handler;
 
-import com.muco.authservice.domain.application.exception.AuthException;
-import com.muco.authservice.domain.interfaces.dto.ErrorResponseDTO;
-import com.muco.authservice.global.enums.ErrorCode;
+import com.muco.musicservice.domain.interfaces.dto.ErrorResponseDTO;
+import com.muco.musicservice.global.enums.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,7 +11,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @RestControllerAdvice
-public class AuthExceptionHandler {
+public class MusicExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleException(Exception e) {
@@ -20,15 +19,6 @@ public class AuthExceptionHandler {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(ErrorCode.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
         return ResponseEntity
                 .internalServerError()
-                .body(errorResponseDTO);
-    }
-
-    @ExceptionHandler(AuthException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAuthException(AuthException e) {
-        log.error(e.getLocalizedMessage());
-        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.of(e.getErrorCode(), e.getMessage());
-        return ResponseEntity
-                .status(errorResponseDTO.getStatus())
                 .body(errorResponseDTO);
     }
 

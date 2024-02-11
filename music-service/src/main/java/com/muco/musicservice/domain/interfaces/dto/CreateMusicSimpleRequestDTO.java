@@ -9,8 +9,6 @@ import java.util.Set;
 
 public record CreateMusicSimpleRequestDTO(
         @NotBlank
-        String userId,
-        @NotBlank
         String name,
         @NotEmpty
         Set<String> genres,
