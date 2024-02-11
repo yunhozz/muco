@@ -29,8 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-    private static final String EMAIL_COOKIE_NAME = "username";
-    private static final int EMAIL_COOKIE_MAX_AGE = 3600;
+    private static final String VERIFYING_EMAIL = "verifying_email";
+    private static final String VERIFYING_CODE = "verifying_code";
+    private static final int VERIFYING_MAX_AGE = 3600;
 
     private final UserService userService;
     private final KafkaHandler kafkaHandler;
@@ -39,7 +40,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseDTO joinByEmail(@Valid @RequestBody SignUpRequestDTO dto, HttpServletResponse response) {
         SignUpResponseDTO data = userService.joinByEmail(dto);
-        CookieUtils.addCookie(response, EMAIL_COOKIE_NAME, CookieUtils.serialize(data.getEmail()), EMAIL_COOKIE_MAX_AGE);
+        CookieUtils.addCookie(response, VERIFYING_EMAIL, CookieUtils.serialize(data.getEmail()), VERIFYING_MAX_AGE);
+        CookieUtils.addCookie(response, VERIFYING_CODE, CookieUtils.serialize(data.getCode()), VERIFYING_MAX_AGE);
+
         return ResponseDTO.of("이메일 가입이 완료되었습니다.", data, SignUpResponseDTO.class);
     }
 
@@ -49,10 +52,17 @@ public class UserController {
             @Valid @RequestBody CodeRequestDTO dto,
             HttpServletRequest request, HttpServletResponse response
     ) {
-        Cookie cookie = CookieUtils.getCookie(request, EMAIL_COOKIE_NAME)
+        Cookie emailCookie = CookieUtils.getCookie(request, VERIFYING_EMAIL)
                 .orElseThrow(() -> new IllegalArgumentException("유저 이메일에 대한 쿠키 정보가 존재하지 않습니다."));
-        UserResponseDTO data = userService.verifyByCode(CookieUtils.deserialize(cookie, String.class), dto.getCode());
-        CookieUtils.deleteCookie(request, response, EMAIL_COOKIE_NAME);
+        Cookie codeCookie = CookieUtils.getCookie(request, VERIFYING_CODE)
+                .orElseThrow(() -> new IllegalArgumentException("인증 코드가 존재하지 않습니다."));
+
+        String email = CookieUtils.deserialize(emailCookie, String.class);
+        String code = CookieUtils.deserialize(codeCookie, String.class);
+        UserResponseDTO data = userService.verifyByCode(email, code, dto.getCode());
+
+        CookieUtils.deleteCookie(request, response, VERIFYING_EMAIL);
+        CookieUtils.deleteCookie(request, response, VERIFYING_CODE);
 
         return ResponseDTO.of("인증에 성공하였습니다.", data, UserResponseDTO.class);
     }
