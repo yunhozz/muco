@@ -1,5 +1,6 @@
 package com.muco.apigateway.filter;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -39,6 +40,12 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
                 String token = optToken.get();
                 try {
                     checkValidToken(token);
+                    Claims claims = parseToken(token);
+                    ServerHttpRequest requestWithSubject = request.mutate()
+                            .header("sub", claims.getSubject())
+                            .build();
+                    return chain.filter(exchange.mutate().request(requestWithSubject).build());
+
                 } catch (ExpiredJwtException e) {
                     HttpCookie cookie = request.getCookies().getFirst("user-id");
                     if (cookie != null) {
@@ -49,18 +56,17 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
                                 .build().toUri();
 
                         WebClient webClient = WebClient.create();
-                        Mono<String> mono = webClient.post()
+                        return webClient.post()
                                 .uri(redirectUri)
                                 .retrieve()
-                                .bodyToMono(String.class);
-
-                        return mono.flatMap(m -> {
-                            ServerHttpResponse response = exchange.getResponse();
-                            DataBuffer buffer = response.bufferFactory().wrap(m.getBytes());
-                            response.setStatusCode(HttpStatus.CREATED);
-                            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                            return response.writeWith(Mono.just(buffer));
-                        });
+                                .bodyToMono(String.class)
+                                .flatMap(m -> {
+                                    ServerHttpResponse response = exchange.getResponse();
+                                    DataBuffer buffer = response.bufferFactory().wrap(m.getBytes());
+                                    response.setStatusCode(HttpStatus.CREATED);
+                                    response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                                    return response.writeWith(Mono.just(buffer));
+                                });
                     }
                 }
             }
