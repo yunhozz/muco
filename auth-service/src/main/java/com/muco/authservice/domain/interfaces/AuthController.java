@@ -84,6 +84,7 @@ public class AuthController {
     ) {
         String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         Authentication authentication = authService.logout(userDetails.getUsername(), accessToken.split(" ")[1]);
+        CookieUtils.deleteCookie(request, response, "username");
         new SecurityContextLogoutHandler().logout(request, response, authentication);
     }
 }

@@ -5,6 +5,7 @@ import com.muco.authservice.domain.application.exception.EmailVerifyFailExceptio
 import com.muco.authservice.domain.application.exception.MailSendFailException;
 import com.muco.authservice.domain.application.exception.PasswordDifferentException;
 import com.muco.authservice.domain.application.exception.UserNotFoundException;
+import com.muco.authservice.domain.application.exception.VerifyingCodeNotFoundException;
 import com.muco.authservice.domain.persistence.entity.User;
 import com.muco.authservice.domain.persistence.entity.UserPassword;
 import com.muco.authservice.domain.persistence.entity.UserProfile;
@@ -16,6 +17,7 @@ import com.muco.authservice.global.dto.req.SignUpRequestDTO;
 import com.muco.authservice.global.dto.res.SignUpResponseDTO;
 import com.muco.authservice.global.dto.res.UserResponseDTO;
 import com.muco.authservice.global.enums.LoginType;
+import com.muco.authservice.global.util.RedisUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Random;
 
 @Service
@@ -38,6 +41,8 @@ public class UserService {
 
     private final JavaMailSender mailSender;
     private final BCryptPasswordEncoder encoder;
+
+    private static final String EMAIL_VERIFY_REDIS_KEY = "verify_email:";
 
     @Transactional(noRollbackFor = MailSendFailException.class)
     public SignUpResponseDTO joinByEmail(SignUpRequestDTO dto) {
@@ -79,6 +84,8 @@ public class UserService {
             messageHelper.setText(text, true);
             mailSender.send(message);
 
+            RedisUtils.saveValue(EMAIL_VERIFY_REDIS_KEY + email, code, Duration.ofDays(30)); // 회원 인증 메일 발송 (30일 기한)
+
         } catch (MailException | MessagingException e) {
             throw new MailSendFailException("메일 전송에 실패하였습니다. 원인 : " + e.getLocalizedMessage());
         }
@@ -87,13 +94,20 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO verifyByCode(String email, String originalCode, String requestCode) {
-        if (!originalCode.equals(requestCode)) {
+    public UserResponseDTO verifyByEmailCode(String userId, String requestCode) {
+        UserInfoQueryDTO userInfoQueryDTO = userProfileRepository.findUserInfoById(Long.parseLong(userId))
+                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+        String email = userInfoQueryDTO.getEmail();
+
+        String verifyCode = RedisUtils.getValue(EMAIL_VERIFY_REDIS_KEY + email)
+                .orElseThrow(() -> new VerifyingCodeNotFoundException("회원 인증 유효시간이 만료되었습니다. 다시 인증 요청을 진행해주세요."));
+        if (!verifyCode.equals(requestCode)) {
             throw new EmailVerifyFailException("입력하신 인증 코드가 일치하지 않습니다. 다시 입력해주세요.");
         }
-        User user = userRepository.findUserByEmail(email)
+        User user = userRepository.findById(Long.parseLong(userId))
                 .orElseThrow(() -> new UserNotFoundException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
         user.addUserByEmailVerify();
+        RedisUtils.deleteValue(EMAIL_VERIFY_REDIS_KEY + email);
 
         return new UserResponseDTO(user);
     }

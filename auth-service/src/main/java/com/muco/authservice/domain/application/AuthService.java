@@ -37,27 +37,25 @@ public class AuthService {
     public TokenResponseDTO login(SignInRequestDTO dto) {
         String email = dto.getEmail();
         String password = dto.getPassword();
-        User user = userRepository.findUserByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
         UserPassword userPassword = userPasswordRepository.findUserPasswordByUserId(user.getId())
                 .orElseThrow(() -> new UserNotFoundException("해당 유저의 패스워드가 존재하지 않습니다. User Email = " + email));
 
         validatePassword(password, userPassword); // 비밀번호 검증
-
-        // 로그인 성공 시 오류 횟수 초기화
+        /* 로그인 성공 시 오류 횟수 초기화 */
         if (userPassword.isRetryCountMoreThan(0)) {
             userPasswordRepository.resetRetryCountById(userPassword.getId());
         }
-
-        return generateJwtToken(String.valueOf(user.getId()), user.getRoles());
+        return generateJwtToken(String.valueOf(user.getId()), email, user.getRoles());
     }
 
     @Transactional(readOnly = true)
-    public Optional<TokenResponseDTO> refreshJwtTokens(String userId) {
-        if (RedisUtils.getValue(userId).isPresent()) {
-            String refreshToken = RedisUtils.getValue(userId).get();
+    public Optional<TokenResponseDTO> refreshJwtTokens(String username) {
+        if (RedisUtils.getValue(username).isPresent()) {
+            String refreshToken = RedisUtils.getValue(username).get();
             UserDetailsImpl userDetails = getUserDetails(refreshToken);
-            return Optional.of(generateJwtToken(userDetails.getUsername(), userDetails.getRoles()));
+            return Optional.of(generateJwtToken(userDetails.getUsername(), username, userDetails.getRoles()));
 
         } else {
             return Optional.empty();
@@ -74,9 +72,9 @@ public class AuthService {
         return authentication;
     }
 
-    private TokenResponseDTO generateJwtToken(String userId, Set<Role> roles) {
+    private TokenResponseDTO generateJwtToken(String userId, String username, Set<Role> roles) {
         TokenResponseDTO tokenResponseDTO = jwtProvider.createJwtTokenDTO(userId, roles);
-        RedisUtils.saveValue(userId, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
+        RedisUtils.saveValue(username, tokenResponseDTO.getRefreshToken(), Duration.ofMillis(tokenResponseDTO.getRtkValidTime()));
         return tokenResponseDTO;
     }
 

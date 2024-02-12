@@ -8,12 +8,10 @@ import com.muco.authservice.global.dto.req.CodeRequestDTO;
 import com.muco.authservice.global.dto.req.SignUpRequestDTO;
 import com.muco.authservice.global.dto.res.SignUpResponseDTO;
 import com.muco.authservice.global.dto.res.UserResponseDTO;
-import com.muco.authservice.global.util.CookieUtils;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,48 +21,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
-    private static final String VERIFYING_EMAIL = "verifying_email";
-    private static final String VERIFYING_CODE = "verifying_code";
-    private static final int VERIFYING_MAX_AGE = 3600;
-
     private final UserService userService;
     private final KafkaHandler kafkaHandler;
 
     @PostMapping("/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseDTO joinByEmail(@Valid @RequestBody SignUpRequestDTO dto, HttpServletResponse response) {
+    public ResponseDTO joinByEmail(@Valid @RequestBody SignUpRequestDTO dto) {
         SignUpResponseDTO data = userService.joinByEmail(dto);
-        CookieUtils.addCookie(response, VERIFYING_EMAIL, CookieUtils.serialize(data.getEmail()), VERIFYING_MAX_AGE);
-        CookieUtils.addCookie(response, VERIFYING_CODE, CookieUtils.serialize(data.getCode()), VERIFYING_MAX_AGE);
-
         return ResponseDTO.of("이메일 가입이 완료되었습니다.", data, SignUpResponseDTO.class);
     }
 
     @PatchMapping("/verification")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseDTO giveUserRoleByEmailVerifying(
-            @Valid @RequestBody CodeRequestDTO dto,
-            HttpServletRequest request, HttpServletResponse response
-    ) {
-        Cookie emailCookie = CookieUtils.getCookie(request, VERIFYING_EMAIL)
-                .orElseThrow(() -> new IllegalArgumentException("유저 이메일에 대한 쿠키 정보가 존재하지 않습니다."));
-        Cookie codeCookie = CookieUtils.getCookie(request, VERIFYING_CODE)
-                .orElseThrow(() -> new IllegalArgumentException("인증 코드가 존재하지 않습니다."));
+    public ResponseDTO giveUserRoleByEmailVerifying(@Valid @RequestBody CodeRequestDTO dto, HttpServletRequest request) {
+        UserResponseDTO data = userService.verifyByEmailCode(request.getHeader("sub"), dto.getCode());
+        /* Call Logout API */
+        WebClient webClient = WebClient.create();
+        webClient.delete()
+                .uri(URI.create("http://localhost:8000/api/auth/sign-out"))
+                .header(HttpHeaders.AUTHORIZATION, request.getHeader(HttpHeaders.AUTHORIZATION))
+                .retrieve()
+                .toBodilessEntity()
+                .subscribe();
 
-        String email = CookieUtils.deserialize(emailCookie, String.class);
-        String code = CookieUtils.deserialize(codeCookie, String.class);
-        UserResponseDTO data = userService.verifyByCode(email, code, dto.getCode());
-
-        CookieUtils.deleteCookie(request, response, VERIFYING_EMAIL);
-        CookieUtils.deleteCookie(request, response, VERIFYING_CODE);
-
-        return ResponseDTO.of("인증에 성공하였습니다.", data, UserResponseDTO.class);
+        return ResponseDTO.of("인증에 성공하였습니다. 다시 로그인을 진행해주세요.", data, UserResponseDTO.class);
     }
 
     @GetMapping("/{id}")
