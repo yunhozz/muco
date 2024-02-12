@@ -41,7 +41,7 @@ public class MusicManagementController {
     public Mono<ResponseDTO> createMusic(@Valid @ModelAttribute CreateMusicSimpleRequestDTO dto, HttpServletRequest request) {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://localhost:8000")
-                .defaultHeader(HttpHeaders.AUTHORIZATION, HttpHeaders.AUTHORIZATION)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, request.getHeader(HttpHeaders.AUTHORIZATION))
                 .build();
 
         return webClient.get()
