@@ -70,7 +70,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactoryImpl<
                     }
                 }
             }
-            return chain.filter(exchange);
+            throw new IllegalArgumentException("Authorization 헤더에 JWT 토큰이 존재하지 않습니다.");
         }, -1);
     }
 
