@@ -37,9 +37,9 @@ public class AuthService {
     public TokenResponseDTO login(SignInRequestDTO dto) {
         String email = dto.getEmail();
         String password = dto.getPassword();
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findWhereEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("해당 이메일의 유저를 찾을 수 없습니다. Email = " + email));
-        UserPassword userPassword = userPasswordRepository.findUserPasswordByUserId(user.getId())
+        UserPassword userPassword = userPasswordRepository.findWhereUserId(user.getId())
                 .orElseThrow(() -> new UserNotFoundException("해당 유저의 패스워드가 존재하지 않습니다. User Email = " + email));
 
         validatePassword(password, userPassword); // 비밀번호 검증

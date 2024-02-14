@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long>, UserProfileCustomRepository {
 
     @Query("select up from UserProfile up join fetch up.user u where up.email = :email")
-    Optional<UserProfile> findWithUserByEmail(@Param("email") String email);
+    Optional<UserProfile> findWithUserWhereEmail(@Param("email") String email);
 
     boolean existsByEmail(String email);
 
