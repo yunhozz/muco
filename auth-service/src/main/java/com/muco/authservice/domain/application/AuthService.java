@@ -6,9 +6,11 @@ import com.muco.authservice.domain.application.exception.UserNotFoundException;
 import com.muco.authservice.domain.persistence.entity.User;
 import com.muco.authservice.domain.persistence.entity.UserPassword;
 import com.muco.authservice.domain.persistence.repo.UserPasswordRepository;
+import com.muco.authservice.domain.persistence.repo.UserProfileRepository;
 import com.muco.authservice.domain.persistence.repo.UserRepository;
 import com.muco.authservice.global.auth.jwt.JwtProvider;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
+import com.muco.authservice.global.dto.query.UserInfoQueryDTO;
 import com.muco.authservice.global.dto.req.SignInRequestDTO;
 import com.muco.authservice.global.dto.res.TokenResponseDTO;
 import com.muco.authservice.global.enums.Role;
@@ -28,6 +30,7 @@ import java.util.Set;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
     private final UserPasswordRepository userPasswordRepository;
 
     private final JwtProvider jwtProvider;
@@ -65,10 +68,14 @@ public class AuthService {
     @Transactional(readOnly = true)
     public Authentication logout(String userId, String token) {
         Authentication authentication = jwtProvider.getAuthentication(token);
-        RedisUtils.getValue(userId).ifPresent(refreshToken -> {
+        UserInfoQueryDTO userInfoQueryDTO = userProfileRepository.findUserInfoById(Long.parseLong(userId))
+                .orElseThrow(() -> new UserNotFoundException("해당 유저가 존재하지 않습니다. id = " + userId));
+
+        RedisUtils.getValue(userInfoQueryDTO.getEmail()).ifPresent(refreshToken -> {
             RedisUtils.deleteValue(userId);
             RedisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
         });
+
         return authentication;
     }
 
