@@ -70,9 +70,10 @@ public class AuthService {
         Authentication authentication = jwtProvider.getAuthentication(token);
         UserInfoQueryDTO userInfoQueryDTO = userProfileRepository.findUserInfoById(Long.parseLong(userId))
                 .orElseThrow(() -> new UserNotFoundException("해당 유저가 존재하지 않습니다. id = " + userId));
+        String email = userInfoQueryDTO.getEmail();
 
-        RedisUtils.getValue(userInfoQueryDTO.getEmail()).ifPresent(refreshToken -> {
-            RedisUtils.deleteValue(userId);
+        RedisUtils.getValue(email).ifPresent(refreshToken -> {
+            RedisUtils.deleteValue(email);
             RedisUtils.saveValue(token, "LOGOUT", Duration.ofMinutes(10)); // 10분간 로그아웃 토큰 저장
         });
 
