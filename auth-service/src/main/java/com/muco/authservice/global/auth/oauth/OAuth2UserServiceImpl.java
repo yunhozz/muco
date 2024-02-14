@@ -43,7 +43,7 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
     }
 
     private User joinOrUpdateUser(OAuth2Provider provider) {
-        return userProfileRepository.findWithUserByEmail(provider.getEmail())
+        return userProfileRepository.findWithUserWhereEmail(provider.getEmail())
                 .map(userProfile -> {
                     User user = userProfile.getUser();
                     user.updateBySocialLogin(provider.getLoginType());
