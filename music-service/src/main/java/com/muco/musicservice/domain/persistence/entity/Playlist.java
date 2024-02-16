@@ -26,11 +26,28 @@ public class Playlist extends BaseEntity {
 
     private String name;
 
+    private int musicCount;
+
     private int likeCount;
 
     public Playlist(Long userId, Music music, String name) {
         this.userId = userId;
         this.music = music;
         this.name = name;
+    }
+
+    public void update(String name) {
+        this.name = name;
+    }
+
+    public void addMusicCount(int count) {
+        musicCount += count;
+    }
+
+    public void subtractMusicCount(int count) {
+        if (musicCount <= 0) {
+            throw new IllegalArgumentException("음원 개수가 0 미만일 수 없습니다.");
+        }
+        musicCount -= count;
     }
 }
