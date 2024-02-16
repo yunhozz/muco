@@ -27,4 +27,10 @@ public class UserPlaylist extends BaseEntity {
     private String name;
 
     private int likeCount;
+
+    public UserPlaylist(Long userId, Music music, String name) {
+        this.userId = userId;
+        this.music = music;
+        this.name = name;
+    }
 }
