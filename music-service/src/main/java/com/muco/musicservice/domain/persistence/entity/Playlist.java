@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserPlaylist extends BaseEntity {
+public class Playlist extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,7 @@ public class UserPlaylist extends BaseEntity {
 
     private int likeCount;
 
-    public UserPlaylist(Long userId, Music music, String name) {
+    public Playlist(Long userId, Music music, String name) {
         this.userId = userId;
         this.music = music;
         this.name = name;
