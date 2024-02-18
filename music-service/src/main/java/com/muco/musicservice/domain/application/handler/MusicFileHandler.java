@@ -14,40 +14,20 @@ import java.nio.file.Path;
 
 @Slf4j
 @Component
-public class MusicFileHandler {
+public class MusicFileHandler extends FileHandler {
 
-    private final FileHandler fileHandler;
-
-    public MusicFileHandler() {
-        fileHandler = new FileHandler() {
-            @Override
-            protected Resource download(String musicUrl) throws IOException {
-                Path path = getPath(musicUrl);
-                InputStream inputStream = Files.newInputStream(path);
-                return new InputStreamResource(inputStream);
-            }
-
-            @Override
-            protected Resource display(String musicUrl) throws IOException {
-                Path path = getPath(musicUrl);
-                InputStream inputStream = Files.newInputStream(path);
-                return new InputStreamResource(inputStream);
-            }
-        };
-    }
-
-    public Music musicUpload(CreateMusicRequestDTO dto) throws IOException {
+    public Music upload(CreateMusicRequestDTO dto) throws IOException {
         log.info("Music Upload : " + dto.musicName());
 
         /* music upload */
-        fileHandler.upload(dto.music());
-        String musicOriginalName = fileHandler.getOriginalName();
-        String musicSavedName = fileHandler.getSavedName();
-        String musicUrl = fileHandler.getFileUrl();
+        upload(dto.music());
+        String musicOriginalName = getOriginalName();
+        String musicSavedName = getSavedName();
+        String musicUrl = getFileUrl();
 
         /* image upload */
-        fileHandler.upload(dto.image());
-        String imageUrl = fileHandler.getFileUrl();
+        upload(dto.image());
+        String imageUrl = getFileUrl();
 
         return Music.create(
                 dto.musicName(),
@@ -60,12 +40,19 @@ public class MusicFileHandler {
         );
     }
 
-    public Resource musicDownload(String musicUrl) throws IOException {
+    @Override
+    public Resource download(String musicUrl) throws IOException {
         log.info("Music Download from " + musicUrl);
-        return fileHandler.download(musicUrl);
+        Path path = getPath(musicUrl);
+        InputStream inputStream = Files.newInputStream(path);
+        return new InputStreamResource(inputStream);
     }
 
-    public String createMusicContentType(String musicUrl) throws IOException {
-        return fileHandler.createContentType(musicUrl);
+    @Override
+    public Resource display(String musicUrl) throws IOException {
+        log.info("Music Display from " + musicUrl);
+        Path path = getPath(musicUrl);
+        InputStream inputStream = Files.newInputStream(path);
+        return new InputStreamResource(inputStream);
     }
 }
