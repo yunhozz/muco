@@ -15,7 +15,10 @@ public interface MusicPlaylistRepository extends JpaRepository<MusicPlaylist, Lo
     Optional<MusicPlaylist> findByMusicAndPlaylist(Music music, Playlist playlist);
 
     @Query("select mp.id from MusicPlaylist mp join mp.playlist p where p.id = :playlistId")
-    List<Long> findWherePlaylistId(@Param("playlistId") Long playlistId);
+    List<Long> findIdsWherePlaylistId(@Param("playlistId") Long playlistId);
+
+    @Query("select m.id from MusicPlaylist mp join mp.music m join mp.playlist p where p.id = :playlistId")
+    List<Long> findMusicIdsWherePlaylistId(@Param("playlistId") Long playlistId);
 
     default void deleteWhereMusicAndPlaylist(Music music, Playlist playlist) {
         MusicPlaylist musicPlaylist = findByMusicAndPlaylist(music, playlist)
