@@ -1,7 +1,6 @@
 package com.muco.musicservice.domain.application.handler;
 
 import lombok.Getter;
-import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -14,7 +13,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Getter
-public abstract class FileHandler {
+public abstract class FileHandler implements ResourceHandler {
 
     private static final String CURRENT_DATE = new SimpleDateFormat("yyMMdd").format(new Date());
     private static final String ABSOLUTE_PATH = new File("").getAbsolutePath();
@@ -25,7 +24,14 @@ public abstract class FileHandler {
     private String savedName;
     private String fileUrl;
 
-    protected void upload(MultipartFile file) throws IOException {
+    @Override
+    public String createContentType(String fileUrl) throws IOException {
+        Path path = getPath(fileUrl);
+        return Files.probeContentType(path);
+    }
+
+    @Override
+    public void upload(MultipartFile file) throws IOException {
         if (!file.isEmpty()) {
             originalName = file.getOriginalFilename();
             String extension = originalName.substring(originalName.lastIndexOf("."));
@@ -41,15 +47,7 @@ public abstract class FileHandler {
         }
     }
 
-    protected String createContentType(String fileUrl) throws IOException {
-        Path path = getPath(fileUrl);
-        return Files.probeContentType(path);
-    }
-
     protected Path getPath(String fileUrl) {
         return Paths.get(FILE_DIRECTORY + fileUrl);
     }
-
-    protected abstract Resource download(String fileUrl) throws IOException;
-    protected abstract Resource display(String fileUrl) throws IOException;
 }

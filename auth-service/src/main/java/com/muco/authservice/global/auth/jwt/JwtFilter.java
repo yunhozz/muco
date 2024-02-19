@@ -19,20 +19,22 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+    private static final String JWT_TOKEN_REFRESH_URI = "/api/auth/token/reissue";
+
     private final JwtProvider jwtProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        log.info("[Request URI] " + requestURI);
+        log.info("[REQUEST URI] " + requestURI);
 
-        resolveToken(token).ifPresent(accessToken -> {
-            if (jwtProvider.isValidToken(accessToken)) {
+        if (!requestURI.equals(JWT_TOKEN_REFRESH_URI)) {
+            resolveToken(token).ifPresent(accessToken -> {
                 Authentication authentication = jwtProvider.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-        });
+            });
+        }
 
         filterChain.doFilter(request, response);
     }

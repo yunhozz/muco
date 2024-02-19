@@ -1,10 +1,10 @@
 package com.muco.authservice.global.auth.oauth;
 
+import com.muco.authservice.domain.persistence.entity.User;
+import com.muco.authservice.domain.persistence.entity.UserProfile;
+import com.muco.authservice.domain.persistence.repo.UserProfileRepository;
+import com.muco.authservice.domain.persistence.repo.UserRepository;
 import com.muco.authservice.global.auth.security.UserDetailsImpl;
-import com.muco.authservice.persistence.entity.User;
-import com.muco.authservice.persistence.entity.UserProfile;
-import com.muco.authservice.persistence.repo.UserProfileRepository;
-import com.muco.authservice.persistence.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -43,7 +43,7 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
     }
 
     private User joinOrUpdateUser(OAuth2Provider provider) {
-        return userProfileRepository.findWithUserByEmail(provider.getEmail())
+        return userProfileRepository.findWithUserWhereEmail(provider.getEmail())
                 .map(userProfile -> {
                     User user = userProfile.getUser();
                     user.updateBySocialLogin(provider.getLoginType());

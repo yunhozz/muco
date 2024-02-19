@@ -8,7 +8,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -27,10 +26,8 @@ public class Musician extends BaseEntity {
 
     private String nickname;
 
-    @ColumnDefault("0")
     private int likeCount;
 
-    @ColumnDefault("0")
     private int musicCount;
 
     private String imageUrl;

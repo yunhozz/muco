@@ -35,7 +35,7 @@ public class MusicManagementService {
     public Long registerMusic(CreateMusicRequestDTO dto) {
         Music music;
         try {
-            music = musicHandler.musicUpload(dto);
+            music = musicHandler.upload(dto);
             musicRepository.save(music);
 
         } catch (IOException e) {
@@ -61,8 +61,8 @@ public class MusicManagementService {
         String musicUrl = music.getMusicUrl();
 
         try {
-            Resource resource = musicHandler.musicDownload(musicUrl);
-            String contentType = musicHandler.createMusicContentType(musicUrl);
+            Resource resource = musicHandler.download(musicUrl);
+            String contentType = musicHandler.createContentType(musicUrl);
             return new FileResponseDTO(resource, contentType, music.getOriginalName());
 
         } catch (IOException e) {
@@ -76,8 +76,8 @@ public class MusicManagementService {
         String imageUrl = music.getImageUrl();
 
         try {
-            Resource resource = imageHandler.displayImage(imageUrl);
-            String contentType = imageHandler.createImageContentType(imageUrl);
+            Resource resource = imageHandler.display(imageUrl);
+            String contentType = imageHandler.createContentType(imageUrl);
             return new FileResponseDTO(resource, contentType, music.getOriginalName());
 
         } catch (IOException e) {

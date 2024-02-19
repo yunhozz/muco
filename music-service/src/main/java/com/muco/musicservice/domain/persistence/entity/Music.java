@@ -35,18 +35,16 @@ public class Music extends BaseEntity {
 
     private String name;
 
-    @ElementCollection(fetch = FetchType.EAGER, targetClass = Genre.class)
-    @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = Genre.class)
     @CollectionTable(joinColumns = @JoinColumn(name = "music_id"), name = "music_genre")
+    @Enumerated(EnumType.STRING)
     private Set<Genre> genres = new HashSet<>();
 
     @Column(columnDefinition = "TEXT")
     private String lyrics;
 
-    @ColumnDefault("0")
     private int playCount;
 
-    @ColumnDefault("0")
     private int likeCount;
 
     @ColumnDefault("-1")

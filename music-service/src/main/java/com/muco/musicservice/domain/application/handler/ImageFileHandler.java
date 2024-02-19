@@ -12,42 +12,28 @@ import java.nio.file.Path;
 
 @Slf4j
 @Component
-public class ImageFileHandler {
+public class ImageFileHandler extends FileHandler {
 
-    private final FileHandler fileHandler;
-
-    public ImageFileHandler() {
-        fileHandler = new FileHandler() {
-            @Override
-            protected Resource download(String imageUrl) throws IOException {
-                return null; //Can't download images
-            }
-
-            @Override
-            protected Resource display(String imageUrl) throws IOException {
-                Path path = getPath(imageUrl);
-                byte[] fileArray;
-                try (FileInputStream fis = new FileInputStream(path.toString());
-                     ByteArrayOutputStream baos = new ByteArrayOutputStream())
-                {
-                    int readCount = 0;
-                    byte[] buffer = new byte[1024];
-                    while ((readCount = fis.read(buffer)) != -1) {
-                        baos.write(buffer, 0, readCount);
-                    }
-                    fileArray = baos.toByteArray();
-                }
-                return new ByteArrayResource(fileArray);
-            }
-        };
+    @Override
+    public Resource download(String imageUrl) throws IOException {
+        return null; // Can't download images
     }
 
-    public Resource displayImage(String imageUrl) throws IOException {
+    @Override
+    public Resource display(String imageUrl) throws IOException {
         log.info("Image Display from " + imageUrl);
-        return fileHandler.display(imageUrl);
-    }
+        Path path = getPath(imageUrl);
+        byte[] fileArray;
 
-    public String createImageContentType(String imageUrl) throws IOException {
-        return fileHandler.createContentType(imageUrl);
+        try (FileInputStream fis = new FileInputStream(path.toString());
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int readCount = 0;
+            while ((readCount = fis.read(buffer)) != -1) {
+                baos.write(buffer, 0, readCount);
+            }
+            fileArray = baos.toByteArray();
+        }
+        return new ByteArrayResource(fileArray);
     }
 }

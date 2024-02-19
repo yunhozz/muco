@@ -1,5 +1,8 @@
 package com.muco.musicservice.domain.interfaces.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ResponseDTO(
         String message,
         Object data
