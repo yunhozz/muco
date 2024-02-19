@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record CreatePlaylistRequestDTO(
         @NotNull
-        Long musicId,
+        String musicId,
         @NotBlank
         String name
 ) {}

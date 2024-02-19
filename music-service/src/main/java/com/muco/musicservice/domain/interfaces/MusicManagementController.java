@@ -49,6 +49,7 @@ public class MusicManagementController {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ResponseDTO.class)
+                .onErrorResume(e -> Mono.just(ResponseDTO.of(e.getLocalizedMessage())))
                 .flatMap(responseDTO -> {
                     UserInfoClientDTO userInfoClientDTO = new ObjectMapper().convertValue(responseDTO.data(), UserInfoClientDTO.class);
                     CreateMusicRequestDTO createMusicRequestDTO = CreateMusicRequestDTO.builder()
