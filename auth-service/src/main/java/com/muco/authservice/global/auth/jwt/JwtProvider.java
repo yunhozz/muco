@@ -32,7 +32,7 @@ public class JwtProvider {
     private final UserDetailsServiceImpl userDetailsService;
     private final MucoProperties mucoProperties;
 
-    private static String secretKey;
+    private String secretKey;
 
     public TokenResponseDTO createJwtTokenDTO(String userId, Set<Role> roles) {
         MucoProperties.Jwt jwtProperties = mucoProperties.getJwt();
