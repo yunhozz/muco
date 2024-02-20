@@ -73,3 +73,8 @@ project(':music-service') {
 	bootJar { enabled = true }
 	jar { enabled = true }
 }
+
+project(':chat-service') {
+	bootJar { enabled = true }
+	jar { enabled = true }
+}
