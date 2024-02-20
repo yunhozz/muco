@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import static com.muco.musicservice.domain.persistence.entity.QMusic.music;
 import static com.muco.musicservice.domain.persistence.entity.QMusicMusician.musicMusician;
 import static com.muco.musicservice.domain.persistence.entity.QMusician.musician;
-import static com.muco.musicservice.domain.persistence.entity.QUserPlaylist.userPlaylist;
+import static com.muco.musicservice.domain.persistence.entity.QPlaylist.playlist;
 
 @Repository
 @RequiredArgsConstructor
@@ -117,11 +117,11 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
     public List<PlaylistSimpleQueryDTO> getPlaylistSimpleListByKeyword(String keyword) {
         return queryFactory
                 .select(new QPlaylistSimpleQueryDTO(
-                        userPlaylist.id,
-                        userPlaylist.name,
-                        userPlaylist.likeCount
+                        playlist.id,
+                        playlist.name,
+                        playlist.likeCount
                 ))
-                .from(userPlaylist)
+                .from(playlist)
                 .where(keywordContainsBySearchCategory(keyword, SearchCategory.PLAYLIST))
                 .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc()) // mysql에서 NumberExpression.random().asc() 동작 x
                 .limit(10)
@@ -217,11 +217,11 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
         List<PlaylistSearchQueryDTO> playListSearchList;
         JPAQuery<PlaylistSearchQueryDTO> playListSearchQuery = queryFactory
                 .select(new QPlaylistSearchQueryDTO(
-                        userPlaylist.id,
-                        userPlaylist.name,
-                        userPlaylist.likeCount
+                        playlist.id,
+                        playlist.name,
+                        playlist.likeCount
                 ))
-                .from(userPlaylist)
+                .from(playlist)
                 .where(keywordContainsBySearchCategory(keyword, SearchCategory.PLAYLIST));
 
         if (condition.equals(SearchCondition.ACCURACY)) {
@@ -241,8 +241,8 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
         }
 
         Long total = queryFactory
-                .select(userPlaylist.count())
-                .from(userPlaylist)
+                .select(playlist.count())
+                .from(playlist)
                 .where(keywordContainsBySearchCategory(keyword, SearchCategory.PLAYLIST))
                 .fetchOne();
 
@@ -297,9 +297,9 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
     private OrderSpecifier<?>[] createPlayListOrderSpecifierByCondition(SearchCondition condition) {
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
         switch (condition) {
-            case LATEST -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, userPlaylist.createdAt));
-            case ASCEND -> orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, userPlaylist.name));
-            case POPULARITY -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, userPlaylist.likeCount));
+            case LATEST -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, playlist.createdAt));
+            case ASCEND -> orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, playlist.name));
+            case POPULARITY -> orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, playlist.likeCount));
             default -> {
                 return null;
             }
@@ -321,6 +321,6 @@ public class MusicMusicianCustomRepositoryImpl implements MusicMusicianCustomRep
     }
 
     private BooleanExpression playlistNameContainsBy(String keyword) {
-        return keyword != null ? userPlaylist.name.contains(keyword) : null;
+        return keyword != null ? playlist.name.contains(keyword) : null;
     }
 }
