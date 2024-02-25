@@ -1,11 +1,13 @@
 package com.muco.musicservice.domain.interfaces;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.muco.musicservice.domain.application.MusicManagementService;
 import com.muco.musicservice.domain.interfaces.dto.CreateMusicSimpleRequestDTO;
 import com.muco.musicservice.domain.interfaces.dto.ResponseDTO;
 import com.muco.musicservice.domain.interfaces.dto.UserInfoClientDTO;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
+import com.muco.musicservice.global.dto.request.UserInfoRequestDTO;
 import com.muco.musicservice.global.dto.response.FileResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -24,10 +26,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/music/manage")
@@ -39,32 +44,50 @@ public class MusicManagementController {
     @PostMapping(consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseDTO> createMusic(@Valid @ModelAttribute CreateMusicSimpleRequestDTO dto, HttpServletRequest request) {
-        WebClient webClient = WebClient.builder()
-                .baseUrl("http://localhost:8000")
-                .defaultHeader(HttpHeaders.AUTHORIZATION, request.getHeader(HttpHeaders.AUTHORIZATION))
-                .build();
+        String sub = request.getHeader("sub");
+        List<String> userIds = new ArrayList<>() {{
+            add(sub);
+            addAll(dto.coworkerIds());
+        }};
 
-        return webClient.get()
-                .uri("/api/users/{id}", request.getHeader("sub"))
+        String requestURI = UriComponentsBuilder
+                .fromUriString("http://localhost:8000/api/users")
+                .queryParam("ids", userIds)
+                .toUriString();
+        ObjectMapper mapper = new ObjectMapper();
+
+        return WebClient.create()
+                .get()
+                .uri(requestURI)
+                .header(HttpHeaders.AUTHORIZATION, request.getHeader(HttpHeaders.AUTHORIZATION))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ResponseDTO.class)
                 .onErrorResume(e -> Mono.just(ResponseDTO.of(e.getLocalizedMessage())))
                 .flatMap(responseDTO -> {
-                    UserInfoClientDTO userInfoClientDTO = new ObjectMapper().convertValue(responseDTO.data(), UserInfoClientDTO.class);
+                    List<UserInfoClientDTO> results = mapper.convertValue(responseDTO.data(), new TypeReference<>() {});
+                    List<UserInfoRequestDTO> userInfoRequestDTOs = new ArrayList<>() {{
+                        for (UserInfoClientDTO userInfoClientDTO : results) {
+                            UserInfoRequestDTO userInfoRequestDTO = new UserInfoRequestDTO(
+                                    userInfoClientDTO.id(),
+                                    userInfoClientDTO.email(),
+                                    Integer.parseInt(userInfoClientDTO.age()),
+                                    userInfoClientDTO.nickname(),
+                                    userInfoClientDTO.imageUrl()
+                            );
+                            add(userInfoRequestDTO);
+                        }
+                    }};
+
                     CreateMusicRequestDTO createMusicRequestDTO = CreateMusicRequestDTO.builder()
-                            .userId(Long.parseLong(userInfoClientDTO.id()))
-                            .email(userInfoClientDTO.email())
-                            .age(Integer.parseInt(userInfoClientDTO.age()))
-                            .nickname(userInfoClientDTO.nickname())
-                            .userImageUrl(userInfoClientDTO.imageUrl())
                             .musicName(dto.name())
                             .genres(dto.genres())
                             .lyrics(dto.lyrics())
                             .music(dto.music())
                             .image(dto.image())
                             .build();
-                    Long result = musicManagementService.registerMusic(createMusicRequestDTO);
+                    Long result = musicManagementService.registerMusic(createMusicRequestDTO, userInfoRequestDTOs);
+
                     return Mono.just(ResponseDTO.of("음악을 성공적으로 등록하였습니다.", result, Long.class));
                 });
     }

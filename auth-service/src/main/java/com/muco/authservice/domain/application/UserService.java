@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -116,6 +117,11 @@ public class UserService {
     public UserInfoQueryDTO findUserInformationById(Long id) {
         return userProfileRepository.findUserInfoById(id)
                 .orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다. id = " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserInfoQueryDTO> findUserInformationListByUserId(List<Long> userIds) {
+        return userProfileRepository.findUserInfoListByIds(userIds);
     }
 
     private String createCode() {

@@ -12,6 +12,7 @@ import com.muco.musicservice.domain.persistence.repository.MusicMusicianReposito
 import com.muco.musicservice.domain.persistence.repository.MusicRepository;
 import com.muco.musicservice.domain.persistence.repository.MusicianRepository;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
+import com.muco.musicservice.global.dto.request.UserInfoRequestDTO;
 import com.muco.musicservice.global.dto.response.FileResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,26 +34,33 @@ public class MusicManagementService {
     private final ImageFileHandler imageHandler;
 
     @Transactional
-    public Long registerMusic(CreateMusicRequestDTO dto) {
+    public Long registerMusic(CreateMusicRequestDTO createMusicRequestDTO, List<UserInfoRequestDTO> userInfoRequestDTOs) {
         Music music;
         try {
-            music = musicHandler.upload(dto);
+            music = musicHandler.upload(createMusicRequestDTO);
             musicRepository.save(music);
 
         } catch (IOException e) {
-            throw new UploadFailException(e.getLocalizedMessage());
+            throw new UploadFailException("파일 업로드에 실패하였습니다. 원인 : " + e.getLocalizedMessage());
         }
 
-        Musician musician = musicianRepository.getMusicianWhenExistsByUserId(dto.userId());
-        if (musician == null) {
-            musician = Musician.create(dto.userId(), dto.email(), dto.age(), dto.nickname(), dto.userImageUrl());
-            musicianRepository.save(musician);
+        for (UserInfoRequestDTO userInfoRequestDTO : userInfoRequestDTOs) {
+            Long userId = Long.valueOf(userInfoRequestDTO.userId());
+            Musician musician = musicianRepository.getMusicianWhenExistsByUserId(userId);
+            if (musician == null) {
+                musician = Musician.create(
+                        userId,
+                        userInfoRequestDTO.email(),
+                        userInfoRequestDTO.age(),
+                        userInfoRequestDTO.nickname(),
+                        userInfoRequestDTO.userImageUrl()
+                );
+                musicianRepository.save(musician);
+            }
+            musician.addMusicCount(1);
+            MusicMusician musicMusician = new MusicMusician(music, musician);
+            musicMusicianRepository.save(musicMusician);
         }
-        musician.addMusicCount(1);
-
-        MusicMusician musicMusician = new MusicMusician(music, musician);
-        musicMusicianRepository.save(musicMusician);
-
         return music.getId();
     }
 
@@ -66,7 +75,7 @@ public class MusicManagementService {
             return new FileResponseDTO(resource, contentType, music.getOriginalName());
 
         } catch (IOException e) {
-            throw new DownloadFailException(e.getLocalizedMessage());
+            throw new DownloadFailException("파일 다운로드에 실패하였습니다. 원인 : " + e.getLocalizedMessage());
         }
     }
 
@@ -81,7 +90,7 @@ public class MusicManagementService {
             return new FileResponseDTO(resource, contentType, music.getOriginalName());
 
         } catch (IOException e) {
-            throw new DownloadFailException(e.getLocalizedMessage());
+            throw new DownloadFailException("파일 다운로드에 실패하였습니다. 원인 : " + e.getLocalizedMessage());
         }
     }
 

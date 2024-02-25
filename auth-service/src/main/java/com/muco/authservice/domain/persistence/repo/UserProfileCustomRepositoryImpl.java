@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.muco.authservice.domain.persistence.entity.QUser.user;
@@ -33,5 +34,21 @@ public class UserProfileCustomRepositoryImpl implements UserProfileCustomReposit
                         .where(user.id.eq(id))
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<UserInfoQueryDTO> findUserInfoListByIds(List<Long> ids) {
+        return queryFactory
+                .select(new QUserInfoQueryDTO(
+                        user.id,
+                        userProfile.email,
+                        userProfile.age,
+                        userProfile.nickname,
+                        userProfile.imageUrl
+                ))
+                .from(userProfile)
+                .join(userProfile.user, user)
+                .where(user.id.in(ids))
+                .fetch();
     }
 }
