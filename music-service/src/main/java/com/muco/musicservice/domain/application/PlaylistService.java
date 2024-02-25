@@ -11,6 +11,7 @@ import com.muco.musicservice.domain.persistence.repository.MusicRepository;
 import com.muco.musicservice.domain.persistence.repository.PlaylistRepository;
 import com.muco.musicservice.global.dto.request.CreatePlaylistRequestDTO;
 import com.muco.musicservice.global.dto.request.UpdatePlaylistRequestDTO;
+import com.muco.musicservice.global.dto.response.query.PlaylistDetailsInfoQueryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +63,11 @@ public class PlaylistService {
         }};
         musicPlaylistRepository.saveAll(musicPlaylists);
         playlist.addMusicCount(musicLongIds.size());
+    }
+
+    @Transactional(readOnly = true)
+    public PlaylistDetailsInfoQueryDTO findMusicListInPlaylist(String playlistId) {
+        return musicPlaylistRepository.findDetailsOfPlaylistWherePlaylistId(Long.valueOf(playlistId));
     }
 
     @Transactional

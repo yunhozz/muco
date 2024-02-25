@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface MusicPlaylistRepository extends JpaRepository<MusicPlaylist, Long> {
+public interface MusicPlaylistRepository extends JpaRepository<MusicPlaylist, Long>, MusicPlaylistCustomRepository {
 
     Optional<MusicPlaylist> findByMusicAndPlaylist(Music music, Playlist playlist);
 

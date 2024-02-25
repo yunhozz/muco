@@ -4,10 +4,12 @@ import com.muco.musicservice.domain.application.PlaylistService;
 import com.muco.musicservice.domain.interfaces.dto.ResponseDTO;
 import com.muco.musicservice.global.dto.request.CreatePlaylistRequestDTO;
 import com.muco.musicservice.global.dto.request.UpdatePlaylistRequestDTO;
+import com.muco.musicservice.global.dto.response.query.PlaylistDetailsInfoQueryDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +39,12 @@ public class PlaylistController {
     public ResponseDTO addMusicOnPlaylist(@RequestParam String id, @RequestParam String... musicIds) {
         playlistService.addMusicOnPlaylist(id, musicIds);
         return ResponseDTO.of("음원을 성공적으로 추가하였습니다.");
+    }
+
+    @GetMapping("/details")
+    public ResponseDTO getPlaylistDetails(@RequestParam String id) {
+        PlaylistDetailsInfoQueryDTO result = playlistService.findMusicListInPlaylist(id);
+        return ResponseDTO.of("특정 플레이리스트 조회 결과입니다.", result, PlaylistDetailsInfoQueryDTO.class);
     }
 
     @PatchMapping
