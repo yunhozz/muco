@@ -9,7 +9,6 @@ import com.muco.musicservice.domain.interfaces.dto.UserInfoClientDTO;
 import com.muco.musicservice.global.dto.request.CreateMusicRequestDTO;
 import com.muco.musicservice.global.dto.request.UserInfoRequestDTO;
 import com.muco.musicservice.global.dto.response.FileResponseDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,8 +43,11 @@ public class MusicManagementController {
 
     @PostMapping(consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ResponseDTO> createMusic(@Valid @ModelAttribute CreateMusicSimpleRequestDTO dto, HttpServletRequest request) {
-        String sub = request.getHeader("sub");
+    public Mono<ResponseDTO> createMusic(
+            @Valid @ModelAttribute CreateMusicSimpleRequestDTO dto,
+            @RequestHeader String sub,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION) String token
+    ) {
         List<String> userIds = new ArrayList<>() {{
             add(sub);
             addAll(dto.coworkerIds());
@@ -59,7 +62,7 @@ public class MusicManagementController {
         return WebClient.create()
                 .get()
                 .uri(requestURI)
-                .header(HttpHeaders.AUTHORIZATION, request.getHeader(HttpHeaders.AUTHORIZATION))
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ResponseDTO.class)
