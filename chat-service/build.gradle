@@ -6,10 +6,9 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.kafka:spring-kafka'
-	implementation 'io.asyncer:r2dbc-mysql:1.1.0'
-	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0' // test
+	implementation 'org.postgresql:r2dbc-postgresql:1.0.4.RELEASE'
+	implementation 'org.postgresql:postgresql'
 
-	runtimeOnly 'com.mysql:mysql-connector-j'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
