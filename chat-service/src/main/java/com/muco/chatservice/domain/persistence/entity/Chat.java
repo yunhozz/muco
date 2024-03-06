@@ -18,9 +18,11 @@ public class Chat {
     @Id
     private Long id;
 
+    private Long chatroomId;
+
     private Long userId;
 
-    private Long chatroomId;
+    private String nickname;
 
     private String content;
 
