@@ -1,24 +1,22 @@
-package com.muco.chatservice.global.config;
+package com.muco.chatservice.global.config
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.config.CorsRegistry;
-import org.springframework.web.reactive.config.EnableWebFlux;
-import org.springframework.web.reactive.config.WebFluxConfigurer;
+import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.config.CorsRegistry
+import org.springframework.web.reactive.config.EnableWebFlux
+import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
 @EnableWebFlux
-public class WebFluxConfig implements WebFluxConfigurer {
+class WebFluxConfig : WebFluxConfigurer {
+    private val MAX_AGE_SECS: Long = 3600
 
-    private final long MAX_AGE_SECS = 3600;
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    override fun addCorsMappings(registry: CorsRegistry) {
         registry
                 .addMapping("/**")
                 .allowedOriginPatterns("*")
                 .allowedHeaders("*")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE")
                 .allowCredentials(true)
-                .maxAge(MAX_AGE_SECS);
+                .maxAge(MAX_AGE_SECS)
     }
 }
