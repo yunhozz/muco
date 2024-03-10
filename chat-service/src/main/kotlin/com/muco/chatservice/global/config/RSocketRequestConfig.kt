@@ -13,7 +13,7 @@ import java.time.Duration
 class RSocketRequestConfig {
 
     @Bean
-    fun getRSocketRequester(strategies: RSocketStrategies?): RSocketRequester {
+    fun getRSocketRequester(strategies: RSocketStrategies): RSocketRequester {
 
         return RSocketRequester.builder()
                 .rsocketConnector { connector: RSocketConnector -> connector.reconnect(Retry.backoff(10, Duration.ofMillis(500))) } // 서버 재연결 설정
