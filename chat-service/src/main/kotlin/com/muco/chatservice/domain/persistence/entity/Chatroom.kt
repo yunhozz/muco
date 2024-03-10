@@ -9,10 +9,10 @@ import java.time.LocalDateTime
 @Table(name = "chatroom")
 data class Chatroom(
         @Id
-        val id: Long,
-        val name: String,
+        val id: Long? = null,
+        var name: String,
         @CreatedDate
-        val createdAt: LocalDateTime,
+        val createdAt: LocalDateTime? = null,
         @LastModifiedDate
-        val updatedAt: LocalDateTime
+        var updatedAt: LocalDateTime? = null
 ) {}

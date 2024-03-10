@@ -9,13 +9,13 @@ import java.time.LocalDateTime
 @Table(name = "chat")
 data class Chat(
         @Id
-        val id: Long,
-        val chatroomId: Long,
-        val userId: Long,
-        val nickname: String,
-        val content: String,
+        val id: Long? = null,
+        var chatroomId: Long,
+        var userId: Long,
+        var nickname: String,
+        var content: String,
         @CreatedDate
-        val createdAt: LocalDateTime,
+        val createdAt: LocalDateTime? = null,
         @LastModifiedDate
-        val updatedAt: LocalDateTime
+        var updatedAt: LocalDateTime? = null
 ) {}
