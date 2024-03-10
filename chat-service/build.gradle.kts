@@ -13,6 +13,7 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-config")
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
 	implementation("org.postgresql:r2dbc-postgresql:1.0.4.RELEASE")
 	implementation("org.postgresql:postgresql")
 
