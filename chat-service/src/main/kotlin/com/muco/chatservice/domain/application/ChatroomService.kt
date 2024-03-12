@@ -19,12 +19,15 @@ class ChatroomService(
     private val chatroomUserRepository: ChatroomUserRepository
 ) {
 
-    fun makeChatroom(userId: Long, dto: CreateChatroomRequestDTO): Mono<Chatroom> {
+    fun makeChatroom(senderId: Long, receiverId: Long, dto: CreateChatroomRequestDTO): Mono<Chatroom> {
         return chatroomRepository.save(Chatroom(name = dto.name))
             .flatMap { chatroom ->
-                val chatroomUser = ChatroomUser(chatroomId = chatroom.id!!, userId = userId)
-                chatroomUserRepository.save(chatroomUser)
-                    .thenReturn(chatroom)
+                val chatroomId = chatroom.id!!
+                val sender = ChatroomUser(chatroomId = chatroomId, userId = senderId)
+                val receiver = ChatroomUser(chatroomId = chatroomId, userId = receiverId)
+
+                chatroomUserRepository.saveAll(listOf(sender, receiver))
+                    .then(Mono.just(chatroom))
             }
     }
 
@@ -48,8 +51,11 @@ class ChatroomService(
     fun deleteChatroom(chatroomId: Long): Mono<Void> {
         return findChatroomById(chatroomId)
             .flatMap { chatroom ->
-                chatRepository.deleteAllByChatroomId(chatroomId = chatroom.id)
-                    .then(chatroomRepository.deleteById(chatroom.id!!))
+                chatroomUserRepository.findAllByChatroomId(chatroomId = chatroom.id!!)
+                    .flatMap { chatroomUser ->
+                        chatRepository.deleteAllByChatroomId(chatroomId = chatroomUser.chatroomId)
+                    }
+                    .then(chatroomRepository.deleteById(chatroom.id))
             }
     }
 
