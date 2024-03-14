@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 data class Chat(
         @Id
         val id: Long? = null,
-        var chatroomId: Long,
-        var userId: Long,
-        var nickname: String,
-        var content: String,
+        val chatroomId: Long,
+        val userId: Long,
+        val nickname: String,
+        val content: String,
         @CreatedDate
         val createdAt: LocalDateTime? = null,
         @LastModifiedDate
