@@ -19,37 +19,34 @@ class ChatroomService(
     private val chatroomUserRepository: ChatroomUserRepository
 ) {
 
-    fun makeChatroom(senderId: Long, receiverId: Long, dto: CreateChatroomRequestDTO): Mono<Chatroom> {
-        return chatroomRepository.save(Chatroom(name = dto.name))
+    fun makeChatroom(userId: Long, dto: CreateChatroomRequestDTO): Mono<Chatroom> =
+        chatroomRepository.save(Chatroom(name = dto.name))
             .flatMap { chatroom ->
                 val chatroomId = chatroom.id!!
-                val sender = ChatroomUser(chatroomId = chatroomId, userId = senderId)
-                val receiver = ChatroomUser(chatroomId = chatroomId, userId = receiverId)
+                val me = ChatroomUser(chatroomId = chatroomId, userId = userId)
+                val partner = ChatroomUser(chatroomId = chatroomId, userId = dto.partnerId)
 
-                chatroomUserRepository.saveAll(listOf(sender, receiver))
+                chatroomUserRepository.saveAll(listOf(me, partner))
                     .then(Mono.just(chatroom))
             }
-    }
 
-    fun updateChatroom(chatroomId: Long, dto: UpdateChatroomRequestDTO): Mono<Chatroom> {
-        return findChatroomById(chatroomId)
+    fun updateChatroom(chatroomId: Long, dto: UpdateChatroomRequestDTO): Mono<Chatroom> =
+        findChatroomById(chatroomId)
             .flatMap { chatroom ->
                 chatroom.updateName(dto.name)
                     .then(chatroomRepository.save(chatroom))
             }
-    }
 
     fun findAllChatroomList(): Flux<Chatroom> = chatroomRepository.findAll()
 
-    fun findChatroomDetails(chatroomId: Long): Flux<Chat> {
-        return findChatroomById(chatroomId)
+    fun findChatroomDetails(chatroomId: Long): Flux<Chat> =
+        findChatroomById(chatroomId)
             .flatMapMany { chatroom ->
                 chatRepository.findAllByChatroomId(chatroom.id)
             }
-    }
 
-    fun deleteChatroom(chatroomId: Long): Mono<Void> {
-        return findChatroomById(chatroomId)
+    fun deleteChatroom(chatroomId: Long): Mono<Void> =
+        findChatroomById(chatroomId)
             .flatMap { chatroom ->
                 chatroomUserRepository.findAllByChatroomId(chatroomId = chatroom.id!!)
                     .flatMap { chatroomUser ->
@@ -57,10 +54,8 @@ class ChatroomService(
                     }
                     .then(chatroomRepository.deleteById(chatroom.id))
             }
-    }
 
-    private fun findChatroomById(id: Long): Mono<Chatroom> {
-        return chatroomRepository.findById(id)
+    private fun findChatroomById(id: Long): Mono<Chatroom> =
+        chatroomRepository.findById(id)
             .switchIfEmpty(Mono.error(RuntimeException("해당 채팅방을 찾을 수 없습니다. chatroom ID = $id")))
-    }
 }
