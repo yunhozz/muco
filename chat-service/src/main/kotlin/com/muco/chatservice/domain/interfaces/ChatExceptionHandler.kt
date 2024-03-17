@@ -3,6 +3,7 @@ package com.muco.chatservice.domain.interfaces
 import com.muco.chatservice.domain.interfaces.dto.ErrorResponseDTO
 import com.muco.chatservice.global.enums.ErrorCode
 import com.muco.chatservice.global.util.logger
+import org.slf4j.Logger
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -14,7 +15,7 @@ import reactor.core.publisher.Mono
 @RestControllerAdvice
 class ChatExceptionHandler {
 
-    val log = logger()
+    private val log: Logger = logger()
 
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
