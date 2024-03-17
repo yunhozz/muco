@@ -41,12 +41,20 @@ class ChatroomService(
     fun deleteChatroom(chatroomId: Long): Mono<Void> =
         findChatroomById(chatroomId)
             .flatMap { chatroom ->
-                chatroomUserRepository.findAllByChatroomId(chatroomId = chatroom.id!!)
-                    .flatMap { chatroomUser ->
-                        chatRepository.deleteAllByChatroomId(chatroomId = chatroomUser.chatroomId)
-                    }
-                    .then(chatroomRepository.deleteById(chatroom.id))
+                Mono.zip(
+                    chatRepository.findAllByChatroomIdOrderByCreatedAtDesc(chatroom.id)
+                        .flatMap { chat ->
+                            chatRepository.deleteById(chat.id!!)
+                        }
+                        .then(),
+                    chatroomUserRepository.findAllByChatroomId(chatroom.id)
+                        .flatMap { chatroomUser ->
+                            chatroomUserRepository.deleteById(chatroomUser.id!!)
+                        }
+                        .then()
+                ).then(Mono.just(chatroom))
             }
+            .flatMap { chatroomRepository.deleteById(it.id!!) }
 
     private fun findChatroomById(id: Long): Mono<Chatroom> =
         chatroomRepository.findById(id)

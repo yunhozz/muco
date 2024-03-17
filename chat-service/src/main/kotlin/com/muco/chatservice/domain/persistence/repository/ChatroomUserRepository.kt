@@ -6,5 +6,5 @@ import reactor.core.publisher.Flux
 
 interface ChatroomUserRepository: R2dbcRepository<ChatroomUser, Long> {
 
-    fun findAllByChatroomId(chatroomId: Long): Flux<ChatroomUser>
+    fun findAllByChatroomId(chatroomId: Long?): Flux<ChatroomUser>
 }
