@@ -1,6 +1,5 @@
 package com.muco.chatservice.domain.application
 
-import com.muco.chatservice.domain.persistence.entity.Chat
 import com.muco.chatservice.domain.persistence.entity.Chatroom
 import com.muco.chatservice.domain.persistence.entity.ChatroomUser
 import com.muco.chatservice.domain.persistence.repository.ChatRepository
@@ -20,11 +19,11 @@ class ChatroomService(
 ) {
 
     fun makeChatroom(userId: Long, dto: CreateChatroomRequestDTO): Mono<Chatroom> =
-        chatroomRepository.save(Chatroom(name = dto.name))
+        chatroomRepository.save(Chatroom(name = dto.name!!))
             .flatMap { chatroom ->
                 val chatroomId = chatroom.id!!
                 val me = ChatroomUser(chatroomId = chatroomId, userId = userId)
-                val partner = ChatroomUser(chatroomId = chatroomId, userId = dto.partnerId)
+                val partner = ChatroomUser(chatroomId = chatroomId, userId = dto.partnerId!!)
 
                 chatroomUserRepository.saveAll(listOf(me, partner))
                     .then(Mono.just(chatroom))
@@ -38,12 +37,6 @@ class ChatroomService(
             }
 
     fun findAllChatroomList(): Flux<Chatroom> = chatroomRepository.findAll()
-
-    fun findChatroomDetails(chatroomId: Long): Flux<Chat> =
-        findChatroomById(chatroomId)
-            .flatMapMany { chatroom ->
-                chatRepository.findAllByChatroomId(chatroom.id)
-            }
 
     fun deleteChatroom(chatroomId: Long): Mono<Void> =
         findChatroomById(chatroomId)
