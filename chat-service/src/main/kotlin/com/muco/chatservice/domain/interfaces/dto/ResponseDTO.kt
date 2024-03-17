@@ -12,12 +12,7 @@ data class ResponseDTO(
     private constructor(message: String): this(message, null)
 
     companion object {
-        fun of(message: String): Mono<ResponseDTO> {
-            return Mono.just(ResponseDTO(message))
-        }
-
-        fun of(message: String, data: Any?): Mono<ResponseDTO> {
-            return Mono.just(ResponseDTO(message, data ?: RuntimeException("데이터가 null 일 수 없습니다.")))
-        }
+        fun of(message: String): Mono<ResponseDTO> = Mono.just(ResponseDTO(message))
+        fun of(message: String, data: Any?): Mono<ResponseDTO> = Mono.just(ResponseDTO(message, data ?: RuntimeException("데이터가 null 일 수 없습니다.")))
     }
 }

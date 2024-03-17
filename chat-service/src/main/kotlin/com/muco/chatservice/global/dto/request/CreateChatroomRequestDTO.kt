@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
 data class CreateChatroomRequestDTO(
-    @NotNull
-    val partnerId: Long,
-    @NotBlank
-    val name: String
+    @field:NotNull
+    val partnerId: Long?,
+    @field:NotBlank
+    val name: String?
 )
