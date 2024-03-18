@@ -42,11 +42,11 @@ class ChatroomService(
         findChatroomById(chatroomId)
             .flatMap { chatroom ->
                 chatRepository.findAllByChatroomIdOrderByCreatedAtDesc(chatroom.id)
-                    .concatMap { chat ->
+                    .flatMap { chat ->
                         chatRepository.deleteById(chat.id!!)
                     }
                     .thenMany(chatroomUserRepository.findAllByChatroomId(chatroom.id))
-                    .concatMap { chatroomUser ->
+                    .flatMap { chatroomUser ->
                         chatroomUserRepository.deleteById(chatroomUser.id!!)
                     }
                     .then(chatroomRepository.deleteById(chatroom.id!!))
