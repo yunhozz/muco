@@ -41,7 +41,7 @@ class ChatroomService(
     fun deleteChatroom(chatroomId: Long): Mono<Void> =
         findChatroomById(chatroomId)
             .flatMap { chatroom ->
-                Mono.zip(
+                Flux.zip(
                     chatRepository.findAllByChatroomIdOrderByCreatedAtDesc(chatroom.id)
                         .flatMap { chat ->
                             chatRepository.deleteById(chat.id!!)
