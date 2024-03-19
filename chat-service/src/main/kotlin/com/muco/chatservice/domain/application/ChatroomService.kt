@@ -36,7 +36,11 @@ class ChatroomService(
                     .then(chatroomRepository.save(chatroom))
             }
 
-    fun findAllChatroomList(): Flux<Chatroom> = chatroomRepository.findAll()
+    fun findChatroomListByUserId(userId: Long): Flux<Chatroom> =
+        chatroomUserRepository.findByUserId(userId)
+            .flatMap { chatroomUser ->
+                chatroomRepository.findById(chatroomUser.chatroomId)
+            }
 
     fun deleteChatroom(chatroomId: Long): Mono<Void> =
         findChatroomById(chatroomId)
