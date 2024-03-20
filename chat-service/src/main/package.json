@@ -1,0 +1,21 @@
+{
+  "name": "main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yunhozz/muco"
+  },
+  "private": true,
+  "dependencies": {
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "rsocket-core": "^0.0.29-alpha.0",
+    "rsocket-websocket-client": "^0.0.29-alpha.0",
+    "web-vitals": "^3.5.2"
+  }
+}
