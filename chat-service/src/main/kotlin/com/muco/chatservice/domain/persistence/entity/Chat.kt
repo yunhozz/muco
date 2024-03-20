@@ -11,8 +11,10 @@ data class Chat(
         @Id
         val id: Long? = null,
         val chatroomId: Long,
-        val userId: Long,
-        val nickname: String,
+        val senderId: Long,
+        val receiverId: Long,
+        val rNickname: String,
+        val rImageUrl: String,
         val content: String,
         @CreatedDate
         val createdAt: LocalDateTime? = null,
