@@ -7,5 +7,4 @@ import reactor.core.publisher.Flux
 interface ChatRepository: R2dbcRepository<Chat, Long> {
 
     fun findAllByChatroomIdOrderByCreatedAtDesc(chatroomId: Long?): Flux<Chat>
-    fun deleteAllByChatroomId(chatroomId: Long?): Flux<Void>
 }
