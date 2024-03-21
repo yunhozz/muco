@@ -14,7 +14,7 @@ data class Chat(
         val senderId: Long,
         val receiverId: Long,
         val rNickname: String,
-        val rImageUrl: String,
+        val rImageUrl: String? = null,
         val content: String,
         @CreatedDate
         val createdAt: LocalDateTime? = null,
