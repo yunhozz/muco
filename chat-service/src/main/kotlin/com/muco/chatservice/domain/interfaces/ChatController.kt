@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import reactor.core.publisher.Mono
 
 @Controller
@@ -21,9 +22,10 @@ class ChatController(
     @ConnectMapping
     fun connect(requester: RSocketRequester): Mono<Void> = chatService.onConnect(requester)
 
-    @MessageMapping("/msg")
-    fun message(@Valid @RequestBody dto: ChatRequestDTO): Mono<ChatRequestDTO> = chatService.message(dto)
-
-    @MessageMapping("/send")
-    fun send(@RequestHeader sub: String, @Valid @RequestBody dto: ChatRequestDTO): Mono<Void> = chatService.sendMessage(dto)
+    @MessageMapping
+    fun sendMessage(
+        @RequestHeader sub: String,
+        @RequestParam chatroomId: String,
+        @Valid @RequestBody dto: ChatRequestDTO
+    ): Mono<ChatRequestDTO> = chatService.sendMessage(sub.toLong(), chatroomId.toLong(), dto)
 }
