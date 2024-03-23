@@ -1,6 +1,7 @@
 package com.muco.chatservice.domain.application
 
 import com.muco.chatservice.domain.persistence.entity.Chat
+import com.muco.chatservice.domain.persistence.entity.ChatroomUser
 import com.muco.chatservice.domain.persistence.repository.ChatRepository
 import com.muco.chatservice.domain.persistence.repository.ChatroomRepository
 import com.muco.chatservice.domain.persistence.repository.ChatroomUserRepository
@@ -42,29 +43,35 @@ class ChatService(
             }
             .flatMap {
                 chatroomRepository.findById(chatroomId)
-                    .flatMapMany { chatroom ->
+                    .switchIfEmpty(Mono.error(RuntimeException("해당 채팅방을 찾을 수 없습니다. id = $chatroomId")))
+                    .flatMap { chatroom ->
                         chatroomUserRepository.findAllByChatroomId(chatroom.id)
                             .collectList()
-                            .flatMapMany { chatroomUsers ->
-                                val chatList: MutableList<Chat> = mutableListOf()
-                                for (cu in chatroomUsers) {
-                                    // TODO : 대화 상대의 닉네임, 프로필 사진 조회
-                                    val chat = Chat(
-                                        chatroomId = chatroom.id!!,
-                                        senderId = cu.userId,
-                                        receiverId = cu.userId,
-                                        rNickname = "",
-                                        rImageUrl = "",
-                                        content = dto.content
-                                    )
-                                    chatList += chat
-                                }
-                                chatRepository.saveAll(chatList)
+                            .flatMap { chatroomUsers ->
+                                // TODO : 대화 상대의 닉네임, 프로필 사진 조회
+                                val (sId, rId) = determineSenderIdAndReceiverId(chatroomUsers, senderId)
+                                chatRepository.save(Chat(
+                                    chatroomId = chatroom.id!!,
+                                    senderId = sId,
+                                    receiverId = rId,
+                                    rNickname = "",
+                                    rImageUrl = "",
+                                    content = dto.content
+                                ))
                             }
                     }
             }
-            .then(Mono.defer { Mono.just(dto) })
+            .then(Mono.just(dto))
 
     fun findAllChatListByChatroom(chatroomId: Long): Flux<Chat> =
         chatRepository.findAllByChatroomIdOrderByCreatedAtDesc(chatroomId)
+
+    private fun determineSenderIdAndReceiverId(users: List<ChatroomUser>, senderId: Long): Pair<Long, Long> {
+        val (user1, user2) = users
+            .map(ChatroomUser::userId)
+            .sorted()
+
+        return if (user1 == senderId) Pair(user1, user2)
+        else Pair(user2, user1)
+    }
 }
