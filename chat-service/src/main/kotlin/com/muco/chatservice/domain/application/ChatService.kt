@@ -18,19 +18,19 @@ class ChatService(
     private val chatroomUserRepository: ChatroomUserRepository
 ) {
 
-    private var participants: List<RSocketRequester> = mutableListOf()
+    private var participants = mutableListOf<RSocketRequester>()
 
     fun onConnect(requester: RSocketRequester): Mono<Void> =
         requester.rsocket()?.let {
             it.onClose()
                 .doFirst {
-                    participants += requester
+                    participants.add(requester)
                 }
                 .doOnError { e ->
                     throw RuntimeException(e.localizedMessage)
                 }
                 .doFinally {
-                    participants -= requester
+                    participants.remove(requester)
                 }
         } ?: Mono.error(RuntimeException("소켓 연결 실패"))
 
@@ -41,24 +41,22 @@ class ChatService(
                     .data(dto)
                     .send()
             }
-            .flatMap {
-                chatroomRepository.findById(chatroomId)
-                    .switchIfEmpty(Mono.error(RuntimeException("해당 채팅방을 찾을 수 없습니다. id = $chatroomId")))
-                    .flatMap { chatroom ->
-                        chatroomUserRepository.findAllByChatroomId(chatroom.id)
-                            .collectList()
-                            .flatMap { chatroomUsers ->
-                                // TODO : 대화 상대의 닉네임, 프로필 사진 조회
-                                val (sId, rId) = determineSenderIdAndReceiverId(chatroomUsers, senderId)
-                                chatRepository.save(Chat(
-                                    chatroomId = chatroom.id!!,
-                                    senderId = sId,
-                                    receiverId = rId,
-                                    rNickname = "",
-                                    rImageUrl = "",
-                                    content = dto.content
-                                ))
-                            }
+            .then(chatroomRepository.findById(chatroomId))
+            .switchIfEmpty(Mono.error(RuntimeException("해당 채팅방을 찾을 수 없습니다. id = $chatroomId")))
+            .flatMap { chatroom ->
+                chatroomUserRepository.findAllByChatroomId(chatroom.id)
+                    .collectList()
+                    .flatMap { chatroomUsers ->
+                        // TODO : 대화 상대의 닉네임, 프로필 사진 조회
+                        val (sId, rId) = determineSenderIdAndReceiverId(chatroomUsers, senderId)
+                        chatRepository.save(Chat(
+                            chatroomId = chatroom.id!!,
+                            senderId = sId,
+                            receiverId = rId,
+                            rNickname = "",
+                            rImageUrl = "",
+                            content = dto.content
+                        ))
                     }
             }
             .then(Mono.just(dto))
