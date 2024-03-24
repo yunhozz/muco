@@ -39,13 +39,13 @@ class ChatroomService(
     fun findChatroomListByUserId(userId: Long): Flux<Chatroom> =
         chatroomUserRepository.findByUserId(userId)
             .flatMap { chatroomUser ->
-                chatroomRepository.findById(chatroomUser.chatroomId)
+                chatroomRepository.findAllByIdOrderByUpdatedAtAsc(chatroomUser.chatroomId)
             }
 
     fun deleteChatroom(chatroomId: Long): Mono<Void> =
         findChatroomById(chatroomId)
             .flatMap { chatroom ->
-                chatRepository.findAllByChatroomIdOrderByCreatedAtDesc(chatroom.id)
+                chatRepository.findAllByChatroomId(chatroom.id)
                     .flatMap { chat ->
                         chatRepository.deleteById(chat.id!!)
                     }

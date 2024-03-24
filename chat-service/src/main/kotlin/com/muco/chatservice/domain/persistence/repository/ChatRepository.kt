@@ -6,5 +6,6 @@ import reactor.core.publisher.Flux
 
 interface ChatRepository: R2dbcRepository<Chat, Long> {
 
+    fun findAllByChatroomId(chatroomId: Long?): Flux<Chat>
     fun findAllByChatroomIdOrderByCreatedAtDesc(chatroomId: Long?): Flux<Chat>
 }
