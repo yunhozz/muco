@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
@@ -20,7 +21,13 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 @EnableKafka
 class KafkaConfig {
 
-    @Bean
+    companion object {
+        const val CONSUMER_FACTORY = "consumerFactory"
+        const val PRODUCER_FACTORY = "producerFactory"
+        const val LISTENER_CONTAINER_FACTORY = "listenerContainerFactory"
+    }
+
+    @Bean(CONSUMER_FACTORY)
     fun consumerFactory(): ConsumerFactory<String, Any> {
         val configs = hashMapOf<String, Any>()
         configs[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092, localhost:9093, localhost:9094"
@@ -30,7 +37,7 @@ class KafkaConfig {
         return DefaultKafkaConsumerFactory(configs)
     }
 
-    @Bean
+    @Bean(PRODUCER_FACTORY)
     fun producerFactory(): ProducerFactory<String, Any> {
         val configs = hashMapOf<String, Any>()
         configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092, localhost:9093, localhost:9094"
@@ -39,14 +46,18 @@ class KafkaConfig {
         return DefaultKafkaProducerFactory(configs)
     }
 
-    @Bean
-    fun concurrentKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> =
+    @Bean(LISTENER_CONTAINER_FACTORY)
+    fun concurrentKafkaListenerContainerFactory(
+        @Qualifier(CONSUMER_FACTORY) factory: ConsumerFactory<String, Any>
+    ): ConcurrentKafkaListenerContainerFactory<String, Any> =
         object : ConcurrentKafkaListenerContainerFactory<String, Any>() {
             init {
-                consumerFactory = consumerFactory()
+                consumerFactory = factory
             }
         };
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, Any> = KafkaTemplate(producerFactory())
+    fun kafkaTemplate(
+        @Qualifier(PRODUCER_FACTORY) factory: ProducerFactory<String, Any>
+    ): KafkaTemplate<String, Any> = KafkaTemplate(factory)
 }
